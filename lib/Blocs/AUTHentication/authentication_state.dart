@@ -10,12 +10,12 @@ class AuthenticationInitial extends AuthenticationState {}
 class AuthenticationLoading extends AuthenticationState {}
 
 class AuthenticationAuthenticated extends AuthenticationState {
-  final String userId;
+  final String? userId;
 
   AuthenticationAuthenticated({required this.userId});
 
   @override
-  List<Object> get props => [userId];
+  List<Object> get props => [userId!];
 }
 
 class AuthenticationUnauthenticated extends AuthenticationState {}
