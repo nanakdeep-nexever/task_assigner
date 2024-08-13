@@ -34,8 +34,12 @@ class AuthenticationBloc
         String? role;
         if (userDoc.data() != null) {
           role = userDoc['role'];
-
-          emit(AuthenticationAuthenticated(userId: role));
+          if (userDoc['status_online'].toString() == 'false') {
+            emit(AuthenticationAuthenticated(userId: role));
+          } else {
+            emit(AuthenticationError(
+                message: "User already LoggedIn on other device"));
+          }
         } else {
           emit(AuthenticationAuthenticated(
               userId: _firebaseAuth.currentUser?.email));
@@ -51,8 +55,14 @@ class AuthenticationBloc
     emit(AuthenticationLoading());
   }
 
-  FutureOr<void> _Logout(
-      LogoutEvent event, Emitter<AuthenticationState> emit) {}
+  FutureOr<void> _Logout(LogoutEvent event, Emitter<AuthenticationState> emit) {
+    emit(AuthenticationLoading());
+    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
+      'status_online': false,
+    });
+    _firebaseAuth.signOut();
+    emit(AuthenticationUnauthenticated());
+  }
 
   FutureOr<void> _PassReset(
       PasswordResetEvent event, Emitter<AuthenticationState> emit) {}
