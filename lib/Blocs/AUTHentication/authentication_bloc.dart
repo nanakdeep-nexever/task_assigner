@@ -37,7 +37,8 @@ class AuthenticationBloc
 
           emit(AuthenticationAuthenticated(userId: role));
         } else {
-          emit(AuthenticationError(message: "no user Role"));
+          emit(AuthenticationAuthenticated(
+              userId: _firebaseAuth.currentUser?.email));
         }
       }
     } catch (e) {
