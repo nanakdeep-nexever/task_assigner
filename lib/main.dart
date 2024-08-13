@@ -1,5 +1,9 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:task_assign_app/Blocs/AUTHentication/authentication_bloc.dart';
+import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
+import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
 
 import 'Screens/Dashboard.dart';
 import 'Screens/Notification_page.dart';
@@ -24,19 +28,32 @@ void main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'TaskAssignPro',
-      initialRoute: '/',
-      routes: {
-        '/': (context) => LoginPage(),
-        '/register': (context) => RegisterPage(),
-        '/dashboard': (context) => DashboardPage(),
-        '/projects': (context) => ProjectManagementPage(),
-        '/tasks': (context) => TaskManagementPage(),
-        '/users': (context) => UserManagementPage(),
-        '/roles': (context) => RoleManagementPage(),
-        '/notifications': (context) => NotificationPage(),
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => AuthenticationBloc(),
+        ),
+        BlocProvider(
+          create: (context) => UserBloc(),
+        ),
+        BlocProvider(
+          create: (context) => NotificationBloc(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'TaskAssignPro',
+        initialRoute: '/',
+        routes: {
+          '/': (context) => LoginPage(),
+          '/register': (context) => RegisterPage(),
+          '/dashboard': (context) => DashboardPage(),
+          '/projects': (context) => ProjectManagementPage(),
+          '/tasks': (context) => TaskManagementPage(),
+          '/users': (context) => UserManagementPage(),
+          '/roles': (context) => RoleManagementPage(),
+          '/notifications': (context) => NotificationPage(),
+        },
+      ),
     );
   }
 }
