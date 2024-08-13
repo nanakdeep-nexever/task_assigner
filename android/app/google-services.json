@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "454982685223",
+    "project_id": "project-tracker-nk",
+    "storage_bucket": "project-tracker-nk.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454982685223:android:c02d68507dfe3ea4f0f402",
+        "android_client_info": {
+          "package_name": "com.example.task_assign_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAe8D251GxCIaenAs9LTwzaYhfK6X92RME"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
