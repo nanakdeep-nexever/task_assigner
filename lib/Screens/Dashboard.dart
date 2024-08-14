@@ -10,7 +10,6 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     String? uid = ModalRoute.of(context)?.settings.arguments.toString();
     return Scaffold(
-      appBar: AppBar(title: Text('Dashboard ${widget}')),
       body: Column(
         children: [
           Expanded(
