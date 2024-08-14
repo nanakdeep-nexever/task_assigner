@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_assign_app/Blocs/AUTHentication/authentication_bloc.dart';
 import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
 import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
+import 'package:task_assign_app/Blocs/Project_Management_BLoC/project_manage_bloc.dart';
 import 'package:task_assign_app/Screens/Views/Admin.dart';
 import 'package:task_assign_app/Screens/Views/Devloper_view.dart';
 import 'package:task_assign_app/Screens/Views/Manager_view.dart';
@@ -88,6 +89,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => NotificationBloc(),
+        ),
+        BlocProvider(
+          create: (context) => ProjectBloc(),
         ),
         BlocProvider(
           create: (context) => UserRoleCubit(
