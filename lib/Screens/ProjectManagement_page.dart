@@ -1,24 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ProjectManagementPage extends StatelessWidget {
+import '../Blocs/Project_Management_BLoC/project_manage_bloc.dart';
+import '../Blocs/Project_Management_BLoC/project_manage_state.dart';
+
+class ProjectManagementPage extends StatefulWidget {
+  @override
+  State<ProjectManagementPage> createState() => _ProjectManagementPageState();
+}
+
+class _ProjectManagementPageState extends State<ProjectManagementPage> {
   @override
   Widget build(BuildContext context) {
+    String? role = ModalRoute.of(context)?.settings.arguments.toString();
+
     return Scaffold(
-      appBar: AppBar(title: Text('Project Management')),
-      body: ListView(
-        children: [
-          ListTile(
-            title: Text('Project A'),
-            subtitle: Text('Description of Project A'),
-            trailing: IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                // Handle project edit
-              },
-            ),
+      appBar: AppBar(
+        title: Text("Project"),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: Icon(Icons.logout),
           ),
-          // Add more projects as necessary
         ],
+      ),
+      body: BlocConsumer<ProjectBloc, ProjectState>(
+        listener: (context, state) {},
+        builder: (context, state) {
+          if (role == 'admin') {
+            if (state is ProjectLoading) {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            } else if (state is ProjectLoaded) {
+              return Text("data");
+            }
+          } else {
+            return Text("null");
+          }
+          return Text("tst");
+        },
       ),
     );
   }

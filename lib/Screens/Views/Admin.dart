@@ -13,11 +13,14 @@ class AdminPage extends StatefulWidget {
   _AdminPageState createState() => _AdminPageState();
 }
 
-class _AdminPageState extends State<AdminPage> {
+class _AdminPageState extends State<AdminPage> with WidgetsBindingObserver {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   late Stream<QuerySnapshot> _usersStream;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   @override
   void initState() {
@@ -87,45 +90,45 @@ class _AdminPageState extends State<AdminPage> {
               ),
             ],
           ),
-          body: StreamBuilder<QuerySnapshot>(
-            stream: _usersStream,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              }
+          body: SafeArea(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: _usersStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
 
-              if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(child: Text('No users available.'));
-              }
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(child: Text('No users available.'));
+                }
 
-              final users = snapshot.data!.docs;
+                final users = snapshot.data!.docs;
 
-              return ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (context, index) {
-                  final user = users[index];
-                  final uid = user.id;
-                  final role = user['role'] ?? 'viewer';
+                return ListView.builder(
+                  itemCount: users.length,
+                  itemBuilder: (context, index) {
+                    final user = users[index];
+                    final uid = user.id;
+                    final role = user['role'] ?? 'viewer';
 
-                  return UserTile(
-                    email: user['email'] ?? 'No Email',
-                    currentRole: role,
-                    isAdmin: user['role'] == 'admin',
-                    onRoleChanged: (newRole) {
-                      if (newRole != user['role']) {
-                        print(
-                            "${user.id} ne role ${newRole} old-Role ${user['role']}");
-                        _updateUserRole(uid, newRole);
-                      }
-                    },
-                  );
-                },
-              );
-            },
+                    return UserTile(
+                      email: user['email'] ?? 'No Email',
+                      currentRole: role,
+                      isAdmin: user['role'] == 'admin',
+                      onRoleChanged: (newRole) {
+                        if (newRole != user['role']) {
+                          _updateUserRole(uid, newRole);
+                        }
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         );
       },

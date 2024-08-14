@@ -19,7 +19,7 @@ class LoginPage extends StatelessWidget {
         listener: (context, state) {
           if (state is AuthenticationAuthenticated) {
             if (state.userId == 'admin') {
-              Navigator.pushReplacementNamed(context, '/admin',
+              Navigator.pushReplacementNamed(context, '/projects',
                   arguments: state.userId.toString());
             } else if (state.userId == 'manager') {
               Navigator.pushReplacementNamed(context, '/manager',
