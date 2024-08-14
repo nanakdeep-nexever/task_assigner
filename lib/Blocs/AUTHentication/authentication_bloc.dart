@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../Screens/Views/check_role.dart';
 import 'authentication_event.dart';
 import 'authentication_state.dart';
 
@@ -11,11 +12,18 @@ class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  AuthenticationBloc() : super(AuthenticationInitial()) {
+  late StreamSubscription<String?> _roleSubscription;
+
+  AuthenticationBloc()
+      : super(AuthenticationInitial(UserRoleManager().init())) {
     on<LoginEvent>(_Login);
     on<RegisterEvent>(_Register);
     on<LogoutEvent>(_Logout);
     on<PasswordResetEvent>(_PassReset);
+    on<AuthenticationRoleChanged>(rolechange);
+    _roleSubscription = UserRoleManager().roleStream.listen((role) {
+      add(AuthenticationRoleChanged(role!));
+    });
   }
 
   FutureOr<void> _Login(
@@ -41,6 +49,14 @@ class AuthenticationBloc
                 message: "User already LoggedIn on other device"));
           }
         } else {
+          _firestore
+              .collection('users')
+              .doc(_firebaseAuth.currentUser?.uid.toString())
+              .set({
+            'email': _firebaseAuth.currentUser?.email.toString(),
+            'role': 'viewer',
+            'status_online': 'false'
+          });
           emit(AuthenticationAuthenticated(
               userId: _firebaseAuth.currentUser?.email));
         }
@@ -59,11 +75,25 @@ class AuthenticationBloc
     emit(AuthenticationLoading());
     _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
       'status_online': false,
+    }).then((onValue) {
+      _firebaseAuth.signOut();
     });
-    _firebaseAuth.signOut();
+
     emit(AuthenticationUnauthenticated());
   }
 
   FutureOr<void> _PassReset(
       PasswordResetEvent event, Emitter<AuthenticationState> emit) {}
+
+  FutureOr<void> rolechange(
+      AuthenticationRoleChanged event, Emitter<AuthenticationState> emit) {
+    print("object bloc ${event.role}");
+    emit(Rolechanged(role: event.role));
+  }
+
+  @override
+  Future<void> close() {
+    _roleSubscription.cancel();
+    return super.close();
+  }
 }

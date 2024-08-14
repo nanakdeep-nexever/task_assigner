@@ -5,7 +5,9 @@ abstract class AuthenticationState extends Equatable {
   List<Object> get props => [];
 }
 
-class AuthenticationInitial extends AuthenticationState {}
+class AuthenticationInitial extends AuthenticationState {
+  AuthenticationInitial(void init);
+}
 
 class AuthenticationLoading extends AuthenticationState {}
 
@@ -27,4 +29,13 @@ class AuthenticationError extends AuthenticationState {
 
   @override
   List<Object> get props => [message];
+}
+
+class Rolechanged extends AuthenticationState {
+  final String role;
+
+  Rolechanged({required this.role});
+
+  @override
+  List<Object> get props => [role];
 }

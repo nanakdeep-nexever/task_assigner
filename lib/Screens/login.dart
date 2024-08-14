@@ -25,7 +25,7 @@ class LoginPage extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/manager',
                   arguments: state.userId.toString());
             } else if (state.userId == 'developer') {
-              Navigator.pushReplacementNamed(context, '/manager',
+              Navigator.pushReplacementNamed(context, '/developer',
                   arguments: state.userId.toString());
             } else {
               Navigator.pushReplacementNamed(context, '/viewer',
