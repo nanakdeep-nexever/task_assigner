@@ -67,6 +67,11 @@ class LoginPage extends StatelessWidget {
                   },
                   child: Text('Login'),
                 ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, "/register");
+                    },
+                    child: Text("Register here")),
                 if (state is AuthenticationUnauthenticated) ...[
                   Text('Please log in', style: TextStyle(color: Colors.red)),
                 ],

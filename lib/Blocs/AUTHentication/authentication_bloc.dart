@@ -67,8 +67,41 @@ class AuthenticationBloc
   }
 
   FutureOr<void> _Register(
-      RegisterEvent event, Emitter<AuthenticationState> emit) {
+      RegisterEvent event, Emitter<AuthenticationState> emit) async {
     emit(AuthenticationLoading());
+
+    try {
+      UserCredential userCredential =
+          await _firebaseAuth.createUserWithEmailAndPassword(
+              email: event.email, password: event.password);
+
+      if (_firebaseAuth.currentUser?.uid != null) {
+        _firestore
+            .collection('users')
+            .doc(_firebaseAuth.currentUser?.uid.toString())
+            .set({
+          'email': _firebaseAuth.currentUser?.email.toString(),
+          'role': 'viewer',
+          'status_online': 'false'
+        });
+        DocumentSnapshot userDoc = await _firestore
+            .collection('users')
+            .doc(userCredential.user!.uid)
+            .get();
+        String? role;
+        if (userDoc.data() != null) {
+          role = userDoc['role'];
+          if (userDoc['status_online'].toString() == 'false') {
+            emit(AuthenticationAuthenticated(userId: role));
+          } else {
+            emit(AuthenticationError(
+                message: "User already LoggedIn on other device"));
+          }
+        }
+      }
+    } catch (e) {
+      emit(AuthenticationError(message: e.toString()));
+    }
   }
 
   FutureOr<void> _Logout(LogoutEvent event, Emitter<AuthenticationState> emit) {
