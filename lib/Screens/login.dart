@@ -22,7 +22,7 @@ class LoginPage extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/projects',
                   arguments: state.userId.toString());
             } else if (state.userId == 'manager') {
-              Navigator.pushReplacementNamed(context, '/manager',
+              Navigator.pushReplacementNamed(context, '/projects',
                   arguments: state.userId.toString());
             } else if (state.userId == 'developer') {
               Navigator.pushReplacementNamed(context, '/developer',

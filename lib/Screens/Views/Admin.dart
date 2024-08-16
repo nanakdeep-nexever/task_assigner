@@ -20,36 +20,10 @@ class _AdminPageState extends State<AdminPage> with WidgetsBindingObserver {
   late Stream<QuerySnapshot> _usersStream;
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
-
-  @override
   void initState() {
     super.initState();
-    _setOnlineStatus(true);
+
     _usersStream = _firestore.collection('users').snapshots();
-  }
-
-  @override
-  void dispose() {
-    _setOnlineStatus(false);
-    super.dispose();
-  }
-
-  void _setOnlineStatus(bool status) async {
-    try {
-      await _firestore
-          .collection('users')
-          .doc(_firebaseAuth.currentUser?.uid)
-          .update({
-        'status_online': status,
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
-    }
   }
 
   void _updateUserRole(String uid, String newRole) async {

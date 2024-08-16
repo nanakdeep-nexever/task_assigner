@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:task_assign_app/constants/firebase_constants.dart';
+import 'package:task_assign_app/main.dart';
 
 import '../../Screens/Views/check_role.dart';
 import 'authentication_event.dart';
@@ -16,6 +18,7 @@ class AuthenticationBloc
 
   AuthenticationBloc()
       : super(AuthenticationInitial(UserRoleManager().init())) {
+    on<CheckAuthEvent>(_checkLogin);
     on<LoginEvent>(_Login);
     on<RegisterEvent>(_Register);
     on<LogoutEvent>(_Logout);
@@ -57,8 +60,7 @@ class AuthenticationBloc
             'role': 'viewer',
             'status_online': 'false'
           });
-          emit(AuthenticationAuthenticated(
-              userId: _firebaseAuth.currentUser?.email));
+          emit(AuthenticationAuthenticated(userId: FBConst.projectCollection));
         }
       }
     } catch (e) {
@@ -95,5 +97,25 @@ class AuthenticationBloc
   Future<void> close() {
     _roleSubscription.cancel();
     return super.close();
+  }
+
+  FutureOr<void> _checkLogin(
+      CheckAuthEvent event, Emitter<AuthenticationState> emit) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    DocumentSnapshot userDoc =
+        await _firestore.collection('users').doc(currentUser?.uid).get();
+    String? role;
+
+    if (currentUser != null && userDoc != null) {
+      /// to home
+      role = userDoc['role'];
+      emit(AuthenticationAuthenticated(userId: role));
+      AppConfig.navigatorKey.currentState
+          ?.pushNamedAndRemoveUntil('/projects', arguments: role, (_) => false);
+    } else {
+      /// to login
+      AppConfig.navigatorKey.currentState
+          ?.pushNamedAndRemoveUntil('/', (_) => false);
+    }
   }
 }

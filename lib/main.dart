@@ -23,6 +23,7 @@ import 'Screens/Taskmanagement.dart';
 import 'Screens/User_managment.dart';
 import 'Screens/login.dart';
 import 'firebase_options.dart';
+import 'splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -103,9 +104,10 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'TaskAssignPro',
         navigatorKey: AppConfig.navigatorKey,
-        initialRoute: '/',
+        initialRoute: '/splash',
         routes: {
           '/': (context) => LoginPage(),
+          '/splash': (context) => SplashScreen(),
           '/register': (context) => RegisterPage(),
           '/admin': (context) => AdminPage(),
           '/manager': (context) => ManagerPage(),

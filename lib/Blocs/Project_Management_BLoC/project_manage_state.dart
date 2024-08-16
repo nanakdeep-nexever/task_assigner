@@ -15,6 +15,10 @@ class ProjectLoaded extends ProjectState {
 
   ProjectLoaded({required this.projects});
 
+  // ProjectLoaded copyWith(List<Project> list) {
+  //   projects = list;
+  // }
+
   @override
   List<Object> get props => [projects];
 }

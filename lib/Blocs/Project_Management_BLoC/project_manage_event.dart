@@ -23,11 +23,13 @@ class UpdateProjectEvent extends ProjectEvent {
   final String name;
   final String description;
   final String manager_id;
+  final DateTime deadline;
   final String Project_Status;
 
   UpdateProjectEvent(
       {required this.Project_Status,
       required this.projectId,
+      required this.deadline,
       required this.name,
       required this.description,
       required this.manager_id});
