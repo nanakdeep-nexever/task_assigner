@@ -10,6 +10,7 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
     on<CreateProjectEvent>(_createProject);
     on<UpdateProjectEvent>(_updateProject);
     on<DeleteProjectEvent>(_deleteProject);
+    emit(ProjectLoading());
   }
 
   FutureOr<void> _createProject(

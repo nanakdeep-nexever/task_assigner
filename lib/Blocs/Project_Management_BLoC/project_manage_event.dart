@@ -8,18 +8,14 @@ abstract class ProjectEvent extends Equatable {
 class LoadProjectsEvent extends ProjectEvent {}
 
 class CreateProjectEvent extends ProjectEvent {
-  final int projectId;
   final String name;
   final String description;
-  final String manager_id;
-  final String Project_Status;
+  final DateTime deadline;
 
-  CreateProjectEvent(
-      {required this.Project_Status,
-      required this.name,
-      required this.description,
-      required this.projectId,
-      required this.manager_id});
+  CreateProjectEvent(this.name, this.description, this.deadline);
+
+  @override
+  List<Object> get props => [name, description, deadline];
 }
 
 class UpdateProjectEvent extends ProjectEvent {

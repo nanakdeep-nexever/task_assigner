@@ -27,6 +27,7 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
       body: BlocConsumer<ProjectBloc, ProjectState>(
         listener: (context, state) {},
         builder: (context, state) {
+          print("Project $role");
           if (role == 'admin') {
             if (state is ProjectLoading) {
               return Center(
