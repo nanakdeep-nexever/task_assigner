@@ -57,12 +57,14 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
       final userRole = userDoc.data()?['role'];
 
       if (userRole == 'admin') {
-        await _firestore.collection('projects').doc(event.name).set({
+        await _firestore.collection('projects').doc(event.projectid).set({
+          'project_id': event.projectid,
           'name': event.name,
           'description': event.description,
           'deadline': event.deadline,
           'manager_id': '',
-          'status': ''
+          'status': '',
+          'developer_Id': ''
         });
         emit(ProjectLoading());
         add(LoadProjectsEvent());
@@ -86,7 +88,8 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
         'status': event.Project_Status,
         'name': event.name,
         'deadline': event.deadline,
-        'description': event.description
+        'description': event.description,
+        'developer_Id': event.developer_id
       });
       add(LoadProjectsEvent());
     } catch (e) {

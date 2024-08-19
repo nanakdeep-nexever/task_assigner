@@ -53,6 +53,8 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
               onPressed: () {
                 final TextEditingController _projectNameController =
                     TextEditingController();
+                final TextEditingController _Project_IdController =
+                    TextEditingController();
                 final TextEditingController _projectDescriptionController =
                     TextEditingController();
                 final TextEditingController _dateController =
@@ -103,6 +105,11 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
                         children: <Widget>[
                           TextField(
                             decoration:
+                                InputDecoration(labelText: 'Project Id'),
+                            controller: _Project_IdController,
+                          ),
+                          TextField(
+                            decoration:
                                 InputDecoration(labelText: 'Project Name'),
                             controller: _projectNameController,
                           ),
@@ -129,6 +136,7 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
                           onPressed: () {
                             context.read<ProjectBloc>().add(
                                   CreateProjectEvent(
+                                      _Project_IdController.text.toString(),
                                       _projectNameController.text.toString(),
                                       _projectDescriptionController.text
                                           .toString(),
@@ -158,7 +166,8 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
                 }
 
                 if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
+                  return Center(
+                      child: Text('Error snapshot: ${snapshot.error}'));
                 }
 
                 final projects = snapshot.data ?? [];
@@ -200,8 +209,8 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
                                 : null,
                             onTap: () =>
                                 _showProjectDialog(context, project: project),
-                            onLongPress: () =>
-                                _showDeleteConfirmation(context, project.id),
+                            onLongPress: () => _showDeleteConfirmation(
+                                context, project.projectid),
                           ),
                         );
                       },
@@ -276,8 +285,17 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
     );
   }
 
+  void _addDeveloper() {
+    // Logic to add a developer
+    // This could involve showing another dialog or updating the project details
+  }
+
   void _showProjectDialog(BuildContext context, {Project? project}) async {
+    String? role = ModalRoute.of(context)?.settings.arguments.toString();
+
     final nameController = TextEditingController(text: project?.name ?? '');
+    final project_idController =
+        TextEditingController(text: project?.projectid ?? '');
     final descriptionController =
         TextEditingController(text: project?.description ?? '');
     final statusController =
@@ -288,13 +306,15 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
             : '');
 
     String? selectedManagerId = project?.managerId;
+    String? selectedDeveloperId = project?.developerId;
     List<Map<String, String>> managers = [];
+    List<Map<String, String>> developer = [];
 
     // Fetch managers for dropdown
     Future<void> _fetchManagers() async {
       final snapshot = await FirebaseFirestore.instance
           .collection('users')
-          .where('role', isEqualTo: 'Manager')
+          .where('role', isEqualTo: 'manager')
           .get();
 
       managers = snapshot.docs.map((doc) {
@@ -312,7 +332,30 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
       }
     }
 
+    Future<void> _fetchDeveloper() async {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', isEqualTo: 'developer')
+          .get();
+
+      developer = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {
+          'id': doc.id,
+          'email': data['email'] as String? ?? '',
+        };
+      }).toList();
+
+      // Ensure selectedManagerId is valid
+      if (selectedDeveloperId != null &&
+          !developer
+              .any((developers) => developers['id'] == selectedDeveloperId)) {
+        selectedDeveloperId = null; // Reset if the manager is not in the list
+      }
+    }
+
     await _fetchManagers();
+    await _fetchDeveloper();
 
     showDialog(
       context: context,
@@ -326,6 +369,10 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
+                    TextField(
+                      controller: project_idController,
+                      decoration: InputDecoration(labelText: 'Project Id'),
+                    ),
                     TextField(
                       controller: nameController,
                       decoration: InputDecoration(labelText: 'Project Name'),
@@ -359,37 +406,148 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
                         }
                       },
                     ),
-                    DropdownButton<String>(
-                      value: selectedManagerId,
-                      hint: Text('Select Manager'),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedManagerId = newValue;
-                        });
-                      },
-                      items: managers.map<DropdownMenuItem<String>>((manager) {
-                        return DropdownMenuItem<String>(
-                          value: manager['id'],
-                          child: Text(manager['email'] ?? ''),
-                        );
-                      }).toList(),
-                    ),
+                    if (role == 'admin') ...[
+                      DropdownButton<String>(
+                        value: selectedManagerId,
+                        disabledHint: Text(selectedManagerId != null
+                            ? 'Manager Assigned'
+                            : selectedManagerId.toString()),
+                        hint: Text('Select Manager'),
+                        onChanged: selectedManagerId == null
+                            ? (String? newValue) {
+                                setState(() {
+                                  selectedManagerId = newValue;
+                                });
+                              }
+                            : null,
+                        items:
+                            managers.map<DropdownMenuItem<String>>((manager) {
+                          return DropdownMenuItem<String>(
+                            value: manager['id'],
+                            child: Text(manager['email'] ?? ''),
+                          );
+                        }).toList(),
+                      ),
+                      if (selectedManagerId !=
+                          null) // Option to remove developer
+                        TextButton(
+                          onPressed: () {
+                            final Projectid = project_idController.text;
+                            final name = nameController.text;
+                            final description = descriptionController.text;
+                            final status = statusController.text;
+                            final deadline =
+                                DateTime.parse(deadlineController.text);
+                            if (selectedDeveloperId == selectedManagerId) {
+                              if (role == 'admin') {
+                                selectedDeveloperId = '';
+                              } else if (role == 'manager') {
+                                selectedManagerId = '';
+                              }
+                            }
+                            setState(() {
+                              if (project != null) {
+                                context
+                                    .read<ProjectBloc>()
+                                    .add(UpdateProjectEvent(
+                                      projectId: Projectid,
+                                      name: name,
+                                      description: description,
+                                      deadline: deadline,
+                                      developer_id: selectedDeveloperId ?? '',
+                                      manager_id: '',
+                                      Project_Status: status,
+                                    ));
+                              }
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Remove Manager'),
+                        ),
+                    ] else if (role == 'manager') ...[
+                      DropdownButton<String>(
+                        value: selectedDeveloperId,
+                        hint: Text('Select developer'),
+                        disabledHint: Text(selectedDeveloperId != null
+                            ? 'Developer Assigned'
+                            : selectedDeveloperId.toString()),
+                        onChanged: selectedDeveloperId == null
+                            ? (String? newValue) {
+                                setState(() {
+                                  selectedDeveloperId = newValue;
+                                });
+                              }
+                            : null,
+                        items: developer
+                            .map<DropdownMenuItem<String>>((developers) {
+                          return DropdownMenuItem<String>(
+                            value: developers['id'],
+                            child: Text(developers['email'] ?? ''),
+                          );
+                        }).toList(),
+                      ),
+                      if (selectedDeveloperId !=
+                          null) // Option to remove developer
+                        TextButton(
+                          onPressed: () {
+                            final Projectid = project_idController.text;
+                            final name = nameController.text;
+                            final description = descriptionController.text;
+                            final status = statusController.text;
+                            final deadline =
+                                DateTime.parse(deadlineController.text);
+                            if (selectedDeveloperId == selectedManagerId) {
+                              if (role == 'admin') {
+                                selectedDeveloperId = '';
+                              } else if (role == 'manager') {
+                                selectedManagerId = '';
+                              }
+                            }
+                            setState(() {
+                              if (project != null) {
+                                context
+                                    .read<ProjectBloc>()
+                                    .add(UpdateProjectEvent(
+                                      projectId: Projectid,
+                                      name: name,
+                                      description: description,
+                                      deadline: deadline,
+                                      developer_id: '',
+                                      manager_id: selectedManagerId ?? '',
+                                      Project_Status: status,
+                                    ));
+                              }
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Text('Remove Developer'),
+                        ),
+                    ]
                   ],
                 ),
                 actions: <Widget>[
                   TextButton(
                     onPressed: () {
+                      final Projectid = project_idController.text;
                       final name = nameController.text;
                       final description = descriptionController.text;
                       final status = statusController.text;
                       final deadline = DateTime.parse(deadlineController.text);
+                      if (selectedDeveloperId == selectedManagerId) {
+                        if (role == 'admin') {
+                          selectedDeveloperId = '';
+                        } else if (role == 'manager') {
+                          selectedManagerId = '';
+                        }
+                      }
 
                       if (project != null) {
                         context.read<ProjectBloc>().add(UpdateProjectEvent(
-                              projectId: project.id,
+                              projectId: Projectid,
                               name: name,
                               description: description,
                               deadline: deadline,
+                              developer_id: selectedDeveloperId ?? '',
                               manager_id: selectedManagerId ?? '',
                               Project_Status: status,
                             ));
@@ -447,6 +605,18 @@ class _ProjectManagementPageState extends State<ProjectManagementPage> {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(managerId)
+        .snapshots()
+        .map((snapshot) => snapshot.data()?['email'] ?? 'Unknown');
+  }
+
+  Stream<String> getDeveloperemail(String developerId) {
+    if (developerId.isEmpty) {
+      return Stream.value(
+          'Unknown'); // Return a default value if the managerId is empty
+    }
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(developerId)
         .snapshots()
         .map((snapshot) => snapshot.data()?['email'] ?? 'Unknown');
   }

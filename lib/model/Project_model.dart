@@ -1,18 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Project {
-  String id;
+  String projectid;
   String name;
   String description;
   String managerId;
+  String developerId;
   DateTime deadline;
   String status_project;
 
   Project(
-      {required this.id,
+      {required this.projectid,
       required this.name,
       required this.description,
       required this.managerId,
+      required this.developerId,
       required this.deadline,
       required this.status_project});
 
@@ -20,10 +22,11 @@ class Project {
     final data = doc.data() as Map<String, dynamic>;
 
     return Project(
-      id: doc.id,
+      projectid: data['project_id'] ?? '',
       name: data['name'] ?? '',
       description: data['description'] ?? '',
       managerId: data['manager_id'] ?? '',
+      developerId: data['developer_Id'] ?? '',
       deadline: (data['deadline'] as Timestamp).toDate(),
       status_project: data['status'] ?? '',
     );
@@ -31,15 +34,13 @@ class Project {
 
   Map<String, dynamic> toMap() {
     return {
+      'project_id': projectid,
       'name': name,
       'description': description,
       'manager_id': managerId,
+      'developer_Id': developerId,
       'deadline': Timestamp.fromDate(deadline),
       'status': status_project
     };
-  }
-
-  void copyWith(Project project) {
-    id = project.id;
   }
 }
