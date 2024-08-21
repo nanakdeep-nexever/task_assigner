@@ -56,14 +56,14 @@ class ProjectBloc extends Bloc<ProjectEvent, ProjectState> {
           await _firestore.collection(FBConst.users).doc(user?.uid).get();
       final userRole = userDoc.data()?['role'];
 
-      if (userRole == 'admin') {
+      if (userRole == 'admin' || userRole == 'manager') {
         await _firestore.collection('projects').doc(event.projectid).set({
           'project_id': event.projectid,
           'name': event.name,
           'description': event.description,
           'deadline': event.deadline,
           'manager_id': '',
-          'status': '',
+          'status': event.status,
           'developer_Id': ''
         });
         emit(ProjectLoading());

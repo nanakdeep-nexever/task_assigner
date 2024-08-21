@@ -18,19 +18,8 @@ class LoginPage extends StatelessWidget {
       body: BlocConsumer<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
           if (state is AuthenticationAuthenticated) {
-            if (state.userId == 'admin') {
-              Navigator.pushReplacementNamed(context, '/projects',
-                  arguments: state.userId.toString());
-            } else if (state.userId == 'manager') {
-              Navigator.pushReplacementNamed(context, '/projects',
-                  arguments: state.userId.toString());
-            } else if (state.userId == 'developer') {
-              Navigator.pushReplacementNamed(context, '/developer',
-                  arguments: state.userId.toString());
-            } else {
-              Navigator.pushReplacementNamed(context, '/viewer',
-                  arguments: state.userId.toString());
-            }
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/dashboard', (_) => false);
           } else if (state is AuthenticationError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -78,3 +67,17 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+//
+// if (state.userId == 'admin') {
+// Navigator.pushReplacementNamed(context, '/admin',
+// arguments: state.userId.toString());
+// } else if (state.userId == 'manager') {
+// Navigator.pushReplacementNamed(context, '/manager',
+// arguments: state.userId.toString());
+// } else if (state.userId == 'developer') {
+// Navigator.pushReplacementNamed(context, '/developer',
+// arguments: state.userId.toString());
+// } else {
+// Navigator.pushReplacementNamed(context, '/viewer',
+// arguments: state.userId.toString());
+// }

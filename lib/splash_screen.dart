@@ -15,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration(seconds: 1)).then((_) {
-      var bloc = context.read<AuthenticationBloc>().add(CheckAuthEvent());
+      context.read<AuthenticationBloc>().add(CheckAuthEvent());
     });
   }
 

@@ -12,16 +12,13 @@ class CreateProjectEvent extends ProjectEvent {
   final String name;
   final String description;
   final DateTime deadline;
+  final String status;
 
   CreateProjectEvent(
-    this.projectid,
-    this.name,
-    this.description,
-    this.deadline,
-  );
+      this.projectid, this.name, this.description, this.deadline, this.status);
 
   @override
-  List<Object> get props => [name, description, deadline, projectid];
+  List<Object> get props => [name, description, deadline, projectid, status];
 }
 
 class UpdateProjectEvent extends ProjectEvent {

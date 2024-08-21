@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:task_assign_app/constants/firebase_constants.dart';
 import 'package:task_assign_app/main.dart';
 
+import '../../Notification_Handle/Notification_Handle.dart';
 import '../../Screens/Views/check_role.dart';
 import 'authentication_event.dart';
 import 'authentication_state.dart';
@@ -32,6 +33,7 @@ class AuthenticationBloc
   FutureOr<void> _Login(
       LoginEvent event, Emitter<AuthenticationState> emit) async {
     emit(AuthenticationLoading());
+
     try {
       UserCredential userCredential =
           await _firebaseAuth.signInWithEmailAndPassword(
@@ -42,6 +44,12 @@ class AuthenticationBloc
             .collection('users')
             .doc(userCredential.user!.uid)
             .get();
+        if (NotificationHandler.token.toString().isNotEmpty) {
+          await _firestore
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .update({'FCM-token': NotificationHandler.token});
+        }
         String? role;
         if (userDoc.data() != null) {
           role = userDoc['role'];
@@ -69,7 +77,7 @@ class AuthenticationBloc
   }
 
   FutureOr<void> _Register(
-      RegisterEvent event, Emitter<AuthenticationState> emit) {
+      RegisterEvent event, Emitter<AuthenticationState> emit) async {
     emit(AuthenticationLoading());
   }
 
@@ -80,6 +88,8 @@ class AuthenticationBloc
     }).then((onValue) {
       _firebaseAuth.signOut();
     });
+    AppConfig.navigatorKey.currentState
+        ?.pushNamedAndRemoveUntil('/', (_) => false);
 
     emit(AuthenticationUnauthenticated());
   }

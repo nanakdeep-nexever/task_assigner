@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:task_assign_app/model/Task_model.dart';
+
+import '../../model/Task_model.dart';
 
 abstract class TaskState extends Equatable {
   @override
@@ -14,16 +15,10 @@ class TaskLoaded extends TaskState {
   final List<Task> tasks;
 
   TaskLoaded({required this.tasks});
-
-  @override
-  List<Object> get props => [tasks];
 }
 
 class TaskError extends TaskState {
   final String message;
 
   TaskError({required this.message});
-
-  @override
-  List<Object> get props => [message];
 }
