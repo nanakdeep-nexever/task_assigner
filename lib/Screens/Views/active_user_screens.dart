@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:task_assign_app/Screens/Views/check_role.dart';
 
 class ActiveUsersScreen extends StatelessWidget {
   final Stream<QuerySnapshot> activeUsersStream;
@@ -202,9 +203,6 @@ class ActiveUsersScreen extends StatelessWidget {
   void _showRoleChangeConfirmationDialog(
       BuildContext context, String uid, String currentRole) {
     if (currentRole == 'admin') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Admin role cannot be changed')),
-      );
       return;
     }
 
@@ -381,38 +379,34 @@ class ActiveUsersScreen extends StatelessWidget {
                       style: const TextStyle(
                           fontWeight: FontWeight.w400, color: Colors.black),
                     ),
-                    trailing: PopupMenuButton<String>(
-                      onSelected: (value) {
-                        if (role == 'admin' && value == 'role') {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Admin role cannot be changed')),
-                          );
-                          return;
-                        }
-                        if (value == 'edit') {
-                          _editUser(context, uid);
-                        } else if (value == 'delete') {
-                          _confirmDeleteUser(context, uid);
-                        } else if (value == 'role') {
-                          _showRoleChangeConfirmationDialog(context, uid, role);
-                        }
-                      },
-                      itemBuilder: (BuildContext context) => [
-                        const PopupMenuItem<String>(
-                          value: 'edit',
-                          child: Text('Edit'),
-                        ),
-                        const PopupMenuItem<String>(
-                          value: 'role',
-                          child: Text('Edit role'),
-                        ),
-                        const PopupMenuItem<String>(
-                          value: 'delete',
-                          child: Text('Delete'),
-                        ),
-                      ],
-                    ),
+                    trailing: isAdmin()
+                        ? PopupMenuButton<String>(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _editUser(context, uid);
+                              } else if (value == 'delete') {
+                                _confirmDeleteUser(context, uid);
+                              } else if (value == 'role') {
+                                _showRoleChangeConfirmationDialog(
+                                    context, uid, role);
+                              }
+                            },
+                            itemBuilder: (BuildContext context) => [
+                              const PopupMenuItem<String>(
+                                value: 'edit',
+                                child: Text('Edit'),
+                              ),
+                              const PopupMenuItem<String>(
+                                value: 'role',
+                                child: Text('Edit role'),
+                              ),
+                              const PopupMenuItem<String>(
+                                value: 'delete',
+                                child: Text('Delete'),
+                              ),
+                            ],
+                          )
+                        : null,
                   ),
                 ),
               );
@@ -420,14 +414,26 @@ class ActiveUsersScreen extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue,
-        onPressed: () => _showCreateUserDialog(context),
-        child: const Icon(
-          Icons.add,
-          size: 30,
-        ),
-      ),
+      floatingActionButton: isAdmin()
+          ? FloatingActionButton(
+              backgroundColor: Colors.blue,
+              onPressed: () => _showCreateUserDialog(context),
+              child: const Icon(
+                Icons.add,
+                size: 30,
+              ),
+            )
+          : null,
     );
+  }
+
+  bool isAdmin() {
+    UserRoleManager().init();
+    String role = UserRoleManager().currentRole.toString();
+    if (role == 'admin') {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

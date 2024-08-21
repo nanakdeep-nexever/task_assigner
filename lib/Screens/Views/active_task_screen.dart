@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'check_role.dart';
+
 class ActiveTasksScreen extends StatelessWidget {
   final Stream<int> activeTasksStream;
 
@@ -128,11 +130,13 @@ class ActiveTasksScreen extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.green,
-        onPressed: () => _showAddTaskDialog(context),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: isAdmin()
+          ? FloatingActionButton(
+              backgroundColor: Colors.green,
+              onPressed: () => _showAddTaskDialog(context),
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 
@@ -620,5 +624,15 @@ class ActiveTasksScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  bool isAdmin() {
+    UserRoleManager().init();
+    String role = UserRoleManager().currentRole.toString();
+    if (role == 'admin') {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
