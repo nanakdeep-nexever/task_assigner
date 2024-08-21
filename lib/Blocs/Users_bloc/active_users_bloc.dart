@@ -20,12 +20,10 @@ class ActiveUsersBloc extends Bloc<ActiveUsersEvent, ActiveUsersState> {
       LoadActiveUsers event, Emitter<ActiveUsersState> emit) async {
     emit(ActiveUsersLoading());
     try {
-      final usersSnapshot = await _firestore
-          .collection('users')
-          .get(); // Fetch users from Firestore
+      final usersSnapshot = await _firestore.collection('users').get();
       emit(ActiveUsersLoaded(usersSnapshot.docs));
     } catch (e) {
-      emit(ActiveUsersError('Failed to load active users'));
+      emit(const ActiveUsersError('Failed to load active users'));
     }
   }
 
@@ -41,7 +39,7 @@ class ActiveUsersBloc extends Bloc<ActiveUsersEvent, ActiveUsersState> {
       await _firestore.collection('users').doc(userCredential.user?.uid).set(
           {'email': event.email, 'role': event.role, 'status_online': 'false'});
 
-      emit(UserActionSuccess('User created successfully'));
+      emit(const UserActionSuccess('User created successfully'));
     } catch (e) {
       emit(ActiveUsersError('Error creating user: $e'));
     }
@@ -51,7 +49,7 @@ class ActiveUsersBloc extends Bloc<ActiveUsersEvent, ActiveUsersState> {
       DeleteUser event, Emitter<ActiveUsersState> emit) async {
     try {
       await _firestore.collection('users').doc(event.uid).delete();
-      emit(UserActionSuccess('User deleted successfully'));
+      emit(const UserActionSuccess('User deleted successfully'));
     } catch (e) {
       emit(ActiveUsersError('Error deleting user: $e'));
     }
@@ -63,7 +61,7 @@ class ActiveUsersBloc extends Bloc<ActiveUsersEvent, ActiveUsersState> {
       await _firestore.collection('users').doc(event.uid).update({
         'role': event.newRole,
       });
-      emit(UserActionSuccess('Role updated successfully'));
+      emit(const UserActionSuccess('Role updated successfully'));
     } catch (e) {
       emit(ActiveUsersError('Error updating role: $e'));
     }

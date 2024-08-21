@@ -5,8 +5,8 @@ import '../active_users_bloc.dart';
 import '../active_users_event.dart';
 import '../active_users_state.dart';
 
-class ActiveUsersScreen extends StatelessWidget {
-  const ActiveUsersScreen({super.key});
+class ActiveUserPage extends StatelessWidget {
+  const ActiveUserPage({super.key});
 
   void _showCreateUserDialog(BuildContext context) {
     final emailController = TextEditingController();
