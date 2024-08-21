@@ -5,9 +5,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_assign_app/Blocs/AUTHentication/authentication_bloc.dart';
 import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
 import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
+import 'package:task_assign_app/Blocs/Project_Management_BLoC/project_manage_bloc.dart';
+import 'package:task_assign_app/Blocs/Task_Management_BLoC/task_bloc.dart';
 import 'package:task_assign_app/Screens/Views/Admin.dart';
 import 'package:task_assign_app/Screens/Views/Devloper_view.dart';
 import 'package:task_assign_app/Screens/Views/Manager_view.dart';
+import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 import 'package:task_assign_app/Screens/Views/viewer_view.dart';
 
 import 'Screens/Dashboard.dart';
@@ -34,6 +37,8 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -47,12 +52,19 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => NotificationBloc(),
         ),
+        BlocProvider(
+          create: (context) => ProjectBloc(),
+        ),
+        BlocProvider(
+          create: (context) => TaskBloc(),
+        ),
       ],
       child: MaterialApp(
         title: 'TaskAssignPro',
-        initialRoute: '/',
+        initialRoute: '/splash',
         routes: {
           '/': (context) => LoginPage(),
+          '/splash': (context) => SplashScreen(),
           '/register': (context) => RegisterPage(),
           '/admin': (context) => AdminPage(),
           '/manager': (context) => ManagerPage(),

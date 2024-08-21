@@ -8,6 +8,8 @@ import 'package:task_assign_app/Blocs/AUTHentication/authentication_state.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 
 class DeveloperPage extends StatefulWidget {
+  const DeveloperPage({super.key});
+
   @override
   State<DeveloperPage> createState() =>
       _DeveloperPageState(UserRoleManager().init());
@@ -45,6 +47,7 @@ class _DeveloperPageState extends State<DeveloperPage> {
         .set({'uid': _firebaseAuth.currentUser?.uid.toString()});
   }
 
+  @override
   void dispose() {
     _setOnlineStatus(false);
     super.dispose();
@@ -57,14 +60,14 @@ class _DeveloperPageState extends State<DeveloperPage> {
         if (state is Rolechanged) {
           if (state.role == 'manager') {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                   content: Text("You're manager now"),
                   duration: Duration(milliseconds: 100)),
             );
             Navigator.pushReplacementNamed(context, '/manager');
           } else if (state.role == 'viewer') {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                   content: Text("You're viewer now"),
                   duration: Duration(milliseconds: 100)),
             );
@@ -80,17 +83,17 @@ class _DeveloperPageState extends State<DeveloperPage> {
                 print(snapshot.data.toString());
                 return Scaffold(
                   appBar: AppBar(
-                    title: Text("${snapshot.data.toString()}"),
+                    title: Text(snapshot.data.toString()),
                     actions: [
                       IconButton(
                         onPressed: () {
                           context.read<AuthenticationBloc>().add(LogoutEvent());
                         },
-                        icon: Icon(Icons.logout),
+                        icon: const Icon(Icons.logout),
                       ),
                     ],
                   ),
-                  body: Center(
+                  body: const Center(
                     child: Text("developer"),
                   ),
                 );
@@ -99,7 +102,7 @@ class _DeveloperPageState extends State<DeveloperPage> {
                 context
                     .read<AuthenticationBloc>()
                     .add(AuthenticationRoleChanged(snapshot.data.toString()));
-                return Text("data of develper");
+                return const Text("data of develper");
               }
             });
       },

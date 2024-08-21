@@ -2,18 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TaskListPage extends StatelessWidget {
+  const TaskListPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Tasks')),
+      appBar: AppBar(title: const Text('Tasks')),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('tasks').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData) {
-            return Center(child: Text('No tasks available.'));
+            return const Center(child: Text('No tasks available.'));
           }
           var tasks = snapshot.data?.docs;
           return ListView.builder(

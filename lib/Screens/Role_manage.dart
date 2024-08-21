@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class RoleManagementPage extends StatelessWidget {
+  const RoleManagementPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Role Management')),
+      appBar: AppBar(title: const Text('Role Management')),
       body: ListView(
-        children: [
+        children: const [
           ListTile(
             title: Text('Admin'),
             subtitle: Text('Full access to all features.'),

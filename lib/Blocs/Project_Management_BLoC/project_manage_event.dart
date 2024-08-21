@@ -1,30 +1,57 @@
 import 'package:equatable/equatable.dart';
 
 abstract class ProjectEvent extends Equatable {
+  const ProjectEvent();
+
   @override
   List<Object> get props => [];
 }
 
-class LoadProjectsEvent extends ProjectEvent {}
+class LoadProjects extends ProjectEvent {}
 
-class CreateProjectEvent extends ProjectEvent {
+class AddProject extends ProjectEvent {
   final String name;
+  final String status;
   final String description;
+  final DateTime? deadline;
 
-  CreateProjectEvent({required this.name, required this.description});
+  const AddProject({
+    required this.name,
+    required this.status,
+    required this.description,
+    this.deadline,
+  });
+
+  @override
+  List<Object> get props =>
+      [name, status, description, deadline ?? DateTime.now()];
 }
 
-class UpdateProjectEvent extends ProjectEvent {
+class EditProject extends ProjectEvent {
   final String projectId;
   final String name;
+  final String status;
   final String description;
+  final DateTime? deadline;
 
-  UpdateProjectEvent(
-      {required this.projectId, required this.name, required this.description});
+  const EditProject({
+    required this.projectId,
+    required this.name,
+    required this.status,
+    required this.description,
+    this.deadline,
+  });
+
+  @override
+  List<Object> get props =>
+      [projectId, name, status, description, deadline ?? DateTime.now()];
 }
 
-class DeleteProjectEvent extends ProjectEvent {
+class DeleteProject extends ProjectEvent {
   final String projectId;
 
-  DeleteProjectEvent({required this.projectId});
+  const DeleteProject({required this.projectId});
+
+  @override
+  List<Object> get props => [projectId];
 }

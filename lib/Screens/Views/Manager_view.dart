@@ -8,6 +8,8 @@ import 'package:task_assign_app/Blocs/AUTHentication/authentication_state.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 
 class ManagerPage extends StatefulWidget {
+  const ManagerPage({super.key});
+
   @override
   State<ManagerPage> createState() =>
       _ManagerPageState(UserRoleManager().init());
@@ -15,7 +17,7 @@ class ManagerPage extends StatefulWidget {
 
 class _ManagerPageState extends State<ManagerPage> {
   _ManagerPageState(void init);
-  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   void _setOnlineStatus(bool status) async {
@@ -35,6 +37,7 @@ class _ManagerPageState extends State<ManagerPage> {
     }
   }
 
+  @override
   void dispose() {
     _setOnlineStatus(false);
     super.dispose();
@@ -53,14 +56,14 @@ class _ManagerPageState extends State<ManagerPage> {
         if (state is Rolechanged) {
           if (state.role == 'developer') {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                   content: Text("You're Devloper now"),
                   duration: Duration(milliseconds: 100)),
             );
             Navigator.pushReplacementNamed(context, '/developer');
           } else if (state.role == 'viewer') {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text("You're viewer now"),
                 duration: Duration(milliseconds: 100),
               ),
@@ -77,17 +80,17 @@ class _ManagerPageState extends State<ManagerPage> {
                 print(snapshot.data.toString());
                 return Scaffold(
                   appBar: AppBar(
-                    title: Text("${snapshot.data.toString()}"),
+                    title: Text(snapshot.data.toString()),
                     actions: [
                       IconButton(
                         onPressed: () {
                           context.read<AuthenticationBloc>().add(LogoutEvent());
                         },
-                        icon: Icon(Icons.logout),
+                        icon: const Icon(Icons.logout),
                       ),
                     ],
                   ),
-                  body: Center(
+                  body: const Center(
                     child: Text("manager"),
                   ),
                 );
@@ -96,7 +99,7 @@ class _ManagerPageState extends State<ManagerPage> {
                 context
                     .read<AuthenticationBloc>()
                     .add(AuthenticationRoleChanged(snapshot.data.toString()));
-                return Text("data of manager");
+                return const Text("data of manager");
               }
             });
       },

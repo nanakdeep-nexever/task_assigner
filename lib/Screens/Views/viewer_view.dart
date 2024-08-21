@@ -13,8 +13,8 @@ class ViewerPage extends StatefulWidget {
 }
 
 class _ViewerPageState extends State<ViewerPage> {
-  FirebaseFirestore _firestoretore = FirebaseFirestore.instance;
-  FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestoretore = FirebaseFirestore.instance;
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   _ViewerPageState(void init);
   void _setOnlineStatus(bool status) async {
@@ -58,7 +58,7 @@ class _ViewerPageState extends State<ViewerPage> {
         if (state is Rolechanged) {
           if (state.role == 'developer') {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text("You're Devloper now"),
               ),
             );
@@ -66,7 +66,7 @@ class _ViewerPageState extends State<ViewerPage> {
           }
           if (state.role == 'manager') {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              const SnackBar(
                 content: Text("You're manager now"),
               ),
             );
