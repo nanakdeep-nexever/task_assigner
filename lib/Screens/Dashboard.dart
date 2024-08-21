@@ -20,7 +20,7 @@ class _DashboardPageState extends State<DashboardPage> {
     String? uid = ModalRoute.of(context)?.settings.arguments.toString();
     return Scaffold(
       appBar: AppBar(
-        title: Text("DashBoArd"),
+        title: Text("DashBoArd "),
         actions: [
           IconButton(
             onPressed: () {
