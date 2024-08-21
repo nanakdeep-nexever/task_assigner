@@ -2,14 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task_assign_app/Blocs/AUTHentication/authentication_bloc.dart';
-import 'package:task_assign_app/Blocs/AUTHentication/authentication_state.dart';
-import 'package:task_assign_app/Blocs/check_user_cubit.dart';
-import 'package:task_assign_app/Blocs/check_user_state.dart';
-import 'package:task_assign_app/Screens/ProjectManagement_page.dart';
-import 'package:task_assign_app/Screens/Role_manage.dart';
-import 'package:task_assign_app/Screens/Taskmanagement.dart';
-// Replace with your actual tasks management screen
+
+import '../../Blocs/AUTHentication/authentication_bloc.dart';
+import '../../Blocs/AUTHentication/authentication_event.dart';
+import '../../Blocs/AUTHentication/authentication_state.dart';
+import 'active_project_screen.dart';
+import 'active_task_screen.dart';
+import 'active_user_screens.dart';
 
 class AdminPage extends StatefulWidget {
   const AdminPage({super.key});
@@ -23,6 +22,8 @@ class AdminPageState extends State<AdminPage> {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
   late Stream<QuerySnapshot> _usersStream;
+  late Stream<QuerySnapshot> _usersTaskStream;
+  late Stream<QuerySnapshot> _usersProjectStream;
   late Stream<int> _activeUsersStream;
   late Stream<int> _activeTasksStream;
   late Stream<int> _activeProjectsStream;
@@ -30,7 +31,12 @@ class AdminPageState extends State<AdminPage> {
   @override
   void initState() {
     super.initState();
+    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
+      'status_online': true,
+    });
     _usersStream = _firestore.collection('users').snapshots();
+    _usersTaskStream = _firestore.collection('tasks').snapshots();
+    _usersProjectStream = _firestore.collection('projects').snapshots();
     _activeUsersStream = _getActiveUsersStream();
     _activeTasksStream = _getActiveTasksStream();
     _activeProjectsStream = _getActiveProjectsStream();
@@ -38,11 +44,15 @@ class AdminPageState extends State<AdminPage> {
 
   @override
   void dispose() {
+    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
+      'status_online': false,
+    });
     super.dispose();
   }
 
   Stream<int> _getActiveUsersStream() {
     return _firestore.collection('users').snapshots().map((snapshot) {
+      print("Active users count: ${snapshot.docs.length}"); // Debug print
       return snapshot.docs.length;
     });
   }
@@ -61,221 +71,532 @@ class AdminPageState extends State<AdminPage> {
         .map((snapshot) => snapshot.docs.length);
   }
 
-  Future<void> _updateUserRole(String uid, String newRole) async {
+  void _updateUserRole(String uid, String newRole) async {
     try {
       await _firestore.collection('users').doc(uid).update({
         'role': newRole,
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Role updated successfully')),
-      );
+          const SnackBar(content: Text('Role updated successfully')));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating role: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error updating role: $e')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<UserRoleCubit, UserRoleState>(
-        builder: (context, state) {
-      if (state is UserRoleLoaded) {
-        if (state.role == 'admin') {
-          return BlocConsumer<AuthenticationBloc, AuthenticationState>(
-            listener: (context, state) {
-              if (state is AuthenticationUnauthenticated) {
-                Navigator.pushReplacementNamed(context, '/');
-              }
-            },
-            builder: (context, state) {
-              return Scaffold(
-                body: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: GridView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 1.5,
-                            crossAxisSpacing: 8.0,
-                            mainAxisSpacing: 8.0,
+    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
+      listener: (context, state) {
+        if (state is AuthenticationUnauthenticated) {
+          Navigator.pushReplacementNamed(context, '/');
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            centerTitle: true,
+            title: const Text(
+              'Admin Dashboard',
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black),
+            ),
+            actions: [
+              IconButton(
+                onPressed: () {
+                  showLogoutDialog();
+                },
+                icon: const Icon(Icons.logout),
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Admin",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                        fontSize: 18),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height *
+                        0.3, // Adjust height as needed
+                    child: GridView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        childAspectRatio: 1.5,
+                        crossAxisSpacing: 8.0,
+                        mainAxisSpacing: 8.0,
+                      ),
+                      itemBuilder: (context, index) {
+                        final titles = [
+                          'Active Users',
+                          'Active Tasks',
+                          'Active Projects'
+                        ];
+                        final colors = [
+                          Colors.blue,
+                          Colors.green,
+                          Colors.orange
+                        ];
+
+                        final streams = [
+                          _activeUsersStream,
+                          _activeTasksStream,
+                          _activeProjectsStream,
+                        ];
+
+                        final screens = [
+                          ActiveUsersScreen(activeUsersStream: _usersStream),
+                          ActiveTasksScreen(
+                            activeTasksStream: _activeTasksStream,
                           ),
-                          itemBuilder: (context, index) {
-                            final titles = [
-                              'Active Users',
-                              'Active Tasks',
-                              'Active Projects'
-                            ];
-                            final colors = [
-                              Colors.blue,
-                              Colors.green,
-                              Colors.orange
-                            ];
+                          ActiveProjectsScreen(
+                              activeProjectsStream: _activeProjectsStream),
+                        ];
 
-                            final streams = [
-                              _activeUsersStream,
-                              _activeTasksStream,
-                              _activeProjectsStream,
-                            ];
-
-                            final screens = [
-                              RoleManage(), // Ensure this screen is implemented
-                              ActiveTasksScreen(), // Replace with your actual tasks management screen
-                              ProjectManagementPage(), // Ensure this screen is implemented
-                            ];
-
-                            return InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => screens[index],
-                                  ),
-                                );
-                              },
-                              child: Card(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                color: colors[index],
-                                elevation: 4,
-                                child: Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10.0),
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          titles[index],
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        StreamBuilder<int>(
-                                          stream: streams[index],
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.waiting) {
-                                              return const Center(
-                                                  child:
-                                                      CircularProgressIndicator());
-                                            }
-
-                                            if (snapshot.hasError) {
-                                              return Center(
-                                                  child: Text(
-                                                      'Error: ${snapshot.error}'));
-                                            }
-
-                                            final count = snapshot.data ?? 0;
-                                            return Text(
-                                              '$count',
-                                              style: const TextStyle(
-                                                fontSize: 24,
-                                                color: Colors.white,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
+                        /*  final screens = [
+                          const ActiveUserPage(),
+                          const ActiveTasksPage(),
+                          const ActiveProjectsPage()
+                        ];
+*/
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => screens[index],
                               ),
                             );
                           },
-                          itemCount: 3,
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            color: colors[index],
+                            elevation: 4,
+                            child: Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(14.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      titles[index],
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    StreamBuilder<int>(
+                                      stream: streams[index],
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState ==
+                                            ConnectionState.waiting) {
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        }
+
+                                        if (snapshot.hasError) {
+                                          return Center(
+                                              child: Text(
+                                                  'Error: ${snapshot.error}'));
+                                        }
+
+                                        final count = snapshot.data ?? 0;
+                                        return Text(
+                                          '$count',
+                                          style: const TextStyle(
+                                            fontSize: 24,
+                                            color: Colors.white,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                      itemCount: 3,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Active Users",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                            fontSize: 18),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ActiveUsersScreen(
+                                      activeUsersStream: _usersStream)));
+                        },
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ActiveUsersScreen(
+                                        activeUsersStream: _usersStream)));
+                          },
+                          child: const Text(
+                            "See all",
+                            style: TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                                fontSize: 18),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      // Expanded(
-                      //   child: StreamBuilder<QuerySnapshot>(
-                      //     stream: _usersStream,
-                      //     builder: (context, snapshot) {
-                      //       if (snapshot.connectionState == ConnectionState.waiting) {
-                      //         return const Center(child: CircularProgressIndicator());
-                      //       }
-                      //
-                      //       if (snapshot.hasError) {
-                      //         return Center(child: Text('Error: ${snapshot.error}'));
-                      //       }
-                      //
-                      //       final users = snapshot.data?.docs ?? [];
-                      //
-                      //       return ListView.builder(
-                      //         itemCount: users.length,
-                      //         itemBuilder: (context, index) {
-                      //           final user = users[index];
-                      //           final uid = user.id;
-                      //           final role = user['role'] ?? 'viewer';
-                      //
-                      //           return ListTile(
-                      //             title: Text(user['email'] ?? 'No Email'),
-                      //             subtitle: Text('Current role: $role'),
-                      //             trailing: role != 'admin'
-                      //                 ? DropdownButton<String>(
-                      //                     value: role,
-                      //                     items: <String>[
-                      //                       'manager',
-                      //                       'developer',
-                      //                       'viewer'
-                      //                     ].map((String value) {
-                      //                       return DropdownMenuItem<String>(
-                      //                         value: value,
-                      //                         child: Text(value),
-                      //                       );
-                      //                     }).toList(),
-                      //                     onChanged: (String? newValue) {
-                      //                       if (newValue != null &&
-                      //                           newValue != role) {
-                      //                         _updateUserRole(uid, newValue);
-                      //                       }
-                      //                     },
-                      //                   )
-                      //                 : Text(
-                      //                     role,
-                      //                     style: const TextStyle(fontSize: 15),
-                      //                   ),
-                      //           );
-                      //         },
-                      //       );
-                      //     },
-                      //   ),
-                      // ),
                     ],
                   ),
-                ),
-              );
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 4.4,
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: _usersStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+
+                        final users = snapshot.data?.docs ?? [];
+
+                        return ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: users.take(2).length,
+                          itemBuilder: (context, index) {
+                            final user = users[index];
+                            final uid = user.id;
+                            final role = user['role'] ?? 'viewer';
+
+                            return Card(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                elevation: 5,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.blue.withOpacity(0.1),
+                                        Colors.white
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: Colors.blue,
+                                      child: Text("${index + 1}"),
+                                    ),
+                                    title: Text(
+                                      "Email: ${user['email'] ?? 'No Email'}",
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    subtitle: Text(
+                                      ' Role: $role',
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ),
+                                ));
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Active Tasks",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                            fontSize: 18),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ActiveTasksScreen(
+                                      activeTasksStream: _activeTasksStream)));
+                        },
+                        child: const Text(
+                          "See all",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                              fontSize: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 4,
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: _usersTaskStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+
+                        final users = snapshot.data?.docs ?? [];
+
+                        return ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: users.length,
+                          itemBuilder: (context, index) {
+                            final user = users[index];
+                            final uid = user.id;
+
+                            return Card(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                elevation: 5,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.green.withOpacity(0.1),
+                                        Colors.white
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: Colors.green,
+                                      child: Text("${index + 1}"),
+                                    ),
+                                    title: Text(
+                                      "Task- ${user['name'] ?? 'No Name'}",
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    subtitle: Text(
+                                      "Assigned to- ${user["assignedTo"] ?? "nothing asssign"}",
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ),
+                                ));
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Active Projects",
+                        style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                            fontSize: 18),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ActiveProjectsScreen(
+                                      activeProjectsStream:
+                                          _activeProjectsStream)));
+                        },
+                        child: const Text(
+                          "See all",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                              fontSize: 18),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height / 4,
+                    child: StreamBuilder<QuerySnapshot>(
+                      stream: _usersProjectStream,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+
+                        final users = snapshot.data?.docs ?? [];
+
+                        return ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: users.length,
+                          itemBuilder: (context, index) {
+                            final user = users[index];
+                            final uid = user.id;
+
+                            return Card(
+                                margin: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                elevation: 5,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.orange.withOpacity(0.1),
+                                        Colors.white
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundColor: Colors.orange,
+                                      child: Text("${index + 1}"),
+                                    ),
+                                    title: Text(
+                                      "Project- ${user['name'] ?? 'No Name'}",
+                                      style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                    subtitle: Text(
+                                      "Description- ${user["description"] ?? "no description"}",
+                                      style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontWeight: FontWeight.w400),
+                                    ),
+                                  ),
+                                ));
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.red.shade50,
+        elevation: 10,
+        title: const Center(
+            child: Text('Confirm Logout',
+                style: TextStyle(
+                    fontWeight: FontWeight.w500, color: Colors.black))),
+        content: const Text(
+          'Are you sure you want to log out?',
+          style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
             },
-          );
-        } else {
-          return Text("");
-        }
-      } else {
-        return CircularProgressIndicator();
-      }
-    }, listener: (context, state) {
-      if (state is UserRoleLoaded) {
-        if (state.role == 'manager') {
-          Navigator.pushReplacementNamed(context, '/manager',
-              arguments: state.role);
-        } else if (state.role == 'developer') {
-          Navigator.pushReplacementNamed(context, '/developer',
-              arguments: state.role);
-        } else if (state.role == 'viewer') {
-          Navigator.pushReplacementNamed(context, '/viewer',
-              arguments: state.role);
-        }
-      } else {}
-    });
+            child: const Text('Cancel',
+                style: TextStyle(
+                    fontWeight: FontWeight.w500, color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<AuthenticationBloc>().add(LogoutEvent());
+            },
+            child: const Text('Logout',
+                style: TextStyle(
+                    fontWeight: FontWeight.w500, color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
 }

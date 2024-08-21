@@ -1,43 +1,38 @@
-abstract class TaskEvent {}
+import 'package:equatable/equatable.dart';
 
-class LoadTasksEvent extends TaskEvent {}
+abstract class TaskEvent extends Equatable {
+  const TaskEvent();
 
-class CreateTaskEvent extends TaskEvent {
-  final String name;
-  final String description;
-  final String? assignedTo;
-  final String? assignedBy;
-  final String status;
-  final DateTime deadline;
-
-  CreateTaskEvent(
-      {required this.name,
-      required this.description,
-      required this.assignedTo,
-      required this.assignedBy,
-      required this.status,
-      required this.deadline});
+  @override
+  List<Object> get props => [];
 }
 
-class UpdateTaskEvent extends TaskEvent {
-  final String name;
-  final String description;
-  final String? assignedTo;
-  final String? assignedBy;
-  final String status;
-  final DateTime deadline;
+class LoadTasks extends TaskEvent {}
 
-  UpdateTaskEvent(
-      {required this.name,
-      required this.description,
-      required this.assignedTo,
-      required this.assignedBy,
-      required this.status,
-      required this.deadline});
+class AddTask extends TaskEvent {
+  final Map<String, dynamic> task;
+
+  const AddTask(this.task);
+
+  @override
+  List<Object> get props => [task];
 }
 
-class DeleteTaskEvent extends TaskEvent {
+class UpdateTask extends TaskEvent {
+  final String taskId;
+  final Map<String, dynamic> updatedTask;
+
+  const UpdateTask(this.taskId, this.updatedTask);
+
+  @override
+  List<Object> get props => [taskId, updatedTask];
+}
+
+class DeleteTask extends TaskEvent {
   final String taskId;
 
-  DeleteTaskEvent({required this.taskId});
+  const DeleteTask(this.taskId);
+
+  @override
+  List<Object> get props => [taskId];
 }
