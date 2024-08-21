@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:task_assign_app/Screens/editTask_page.dart';
 
 import 'check_role.dart';
 
@@ -106,7 +107,14 @@ class ActiveTasksScreen extends StatelessWidget {
                     trailing: PopupMenuButton<String>(
                       onSelected: (value) {
                         if (value == 'Edit') {
-                          _showEditTaskDialog(context, task);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditTaskPage(
+                                task: task,
+                              ),
+                            ),
+                          );
                         } else if (value == 'Delete') {
                           _deleteTask(
                               context, task.id); // Pass context to _deleteTask
@@ -355,222 +363,234 @@ class ActiveTasksScreen extends StatelessWidget {
     );
   }
 
-  void _showEditTaskDialog(BuildContext context, QueryDocumentSnapshot task) {
-    final nameController = TextEditingController(text: task['name']);
-    final descriptionController =
-        TextEditingController(text: task['description']);
-    DateTime? selectedDeadline = (task['deadline'] as Timestamp).toDate();
-    String? selectedDeveloper = task['assignedTo'];
-    String? selectedManager = task['assignedBy'];
-    String? selectedStatus = task['status'];
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              elevation: 10,
-              backgroundColor: Colors.green.shade50,
-              title: const Center(
-                  child: Text(
-                'Edit Task',
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black),
-              )),
-              content: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      controller: nameController,
-                      decoration: const InputDecoration(labelText: 'Task Name'),
-                    ),
-                    TextField(
-                      controller: descriptionController,
-                      decoration:
-                          const InputDecoration(labelText: 'Task Description'),
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButton<String>(
-                      hint: const Text('Select Status'),
-                      value: selectedStatus,
-                      items: ['Open', 'In Progress', 'Completed']
-                          .map((status) => DropdownMenuItem<String>(
-                                value: status,
-                                child: Text(status),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedStatus = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    FutureBuilder(
-                      future: FirebaseFirestore.instance
-                          .collection('users')
-                          .where("role", isEqualTo: "manager")
-                          .get(),
-                      builder:
-                          (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        }
-                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const Text('No managers available');
-                        }
-                        final managers = snapshot.data!.docs;
-                        return DropdownButton<String>(
-                          hint: const Text('Assigned By (Manager)'),
-                          value: selectedManager,
-                          items: managers.map((doc) {
-                            final manager = doc.data() as Map<String, dynamic>;
-                            return DropdownMenuItem<String>(
-                              value: manager['email'] as String?,
-                              child: Text(
-                                  manager['email'] as String? ?? 'Unknown'),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedManager = value;
-                            });
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    FutureBuilder(
-                      future: FirebaseFirestore.instance
-                          .collection('users')
-                          .where("role", isEqualTo: "developer")
-                          .get(),
-                      builder:
-                          (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        }
-                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const Text('No developers available');
-                        }
-                        final developers = snapshot.data!.docs;
-                        return DropdownButton<String>(
-                          hint: const Text('Assign to Developer'),
-                          value: selectedDeveloper,
-                          items: developers.map((doc) {
-                            final developer =
-                                doc.data() as Map<String, dynamic>;
-                            return DropdownMenuItem<String>(
-                              value: developer['email'] as String?,
-                              child: Text(
-                                  developer['email'] as String? ?? 'Unknown'),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedDeveloper = value;
-                            });
-                          },
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            selectedDeadline == null
-                                ? 'Select Deadline'
-                                : DateFormat.yMd().format(selectedDeadline!),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.calendar_today),
-                          onPressed: () async {
-                            final pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: selectedDeadline ?? DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(2100),
-                            );
-                            if (pickedDate != null) {
-                              setState(() {
-                                selectedDeadline = pickedDate;
-                              });
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text(
-                    'Cancel',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    final updatedTask = {
-                      'name': nameController.text,
-                      'description': descriptionController.text,
-                      'assignedTo': selectedDeveloper ?? 'Unassigned',
-                      'assignedBy': selectedManager ?? 'Unknown',
-                      'status': selectedStatus ?? 'Open', // Add status
-                      'deadline': selectedDeadline ?? DateTime.now(),
-                    };
-
-                    FirebaseFirestore.instance
-                        .collection('tasks')
-                        .doc(task.id)
-                        .update(updatedTask)
-                        .catchError((error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content: Text('Failed to update task: $error')),
-                      );
-                    });
-
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'Update Task',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+  // void _showEditTaskDialog(BuildContext context, QueryDocumentSnapshot task) {
+  //   final nameController = TextEditingController(text: task['name']);
+  //   final descriptionController =
+  //       TextEditingController(text: task['description']);
+  //   DateTime? selectedDeadline = (task['deadline'] as Timestamp).toDate();
+  //   String? selectedDeveloper = task['assignedTo'];
+  //   String? selectedManager = task['assignedBy'];
+  //   String? selectedStatus = task['status'];
+  //
+  //   bool isDeveloper() {
+  //     UserRoleManager().init();
+  //     String role = UserRoleManager().currentRole.toString();
+  //     if (role == 'developer') {
+  //       return true;
+  //     } else {
+  //       return false;
+  //     }
+  //   }
+  //
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return StatefulBuilder(
+  //         builder: (context, setState) {
+  //           return AlertDialog(
+  //             elevation: 10,
+  //             backgroundColor: Colors.green.shade50,
+  //             title: const Center(
+  //                 child: Text(
+  //               'Edit Task',
+  //               style: TextStyle(
+  //                   fontSize: 18,
+  //                   fontWeight: FontWeight.w500,
+  //                   color: Colors.black),
+  //             )),
+  //             content: SingleChildScrollView(
+  //               child: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.start,
+  //                 children: [
+  //                   TextField(
+  //                     enabled: isDeveloper() ? false : true,
+  //                     controller: nameController,
+  //                     decoration: const InputDecoration(labelText: 'Task Name'),
+  //                   ),
+  //                   TextField(
+  //                     enabled: isDeveloper() ? false : true,
+  //                     controller: descriptionController,
+  //                     decoration:
+  //                         const InputDecoration(labelText: 'Task Description'),
+  //                   ),
+  //                   const SizedBox(height: 16),
+  //                   DropdownButton<String>(
+  //                     hint: const Text('Select Status'),
+  //                     value: selectedStatus,
+  //                     items: ['Open', 'In Progress', 'Completed']
+  //                         .map((status) => DropdownMenuItem<String>(
+  //                               value: status,
+  //                               child: Text(status),
+  //                             ))
+  //                         .toList(),
+  //                     onChanged: (value) {
+  //                       setState(() {
+  //                         selectedStatus = value;
+  //                       });
+  //                     },
+  //                   ),
+  //                   const SizedBox(height: 16),
+  //                   FutureBuilder(
+  //                     future: FirebaseFirestore.instance
+  //                         .collection('users')
+  //                         .where("role", isEqualTo: "manager")
+  //                         .get(),
+  //                     builder:
+  //                         (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+  //                       if (snapshot.connectionState ==
+  //                           ConnectionState.waiting) {
+  //                         return const Center(
+  //                             child: CircularProgressIndicator());
+  //                       }
+  //                       if (snapshot.hasError) {
+  //                         return Center(
+  //                             child: Text('Error: ${snapshot.error}'));
+  //                       }
+  //                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+  //                         return const Text('No managers available');
+  //                       }
+  //                       final managers = snapshot.data!.docs;
+  //                       return DropdownButton<String>(
+  //                         hint: const Text('Assigned By (Manager)'),
+  //                         value: selectedManager,
+  //                         items: managers.map((doc) {
+  //                           final manager = doc.data() as Map<String, dynamic>;
+  //                           return DropdownMenuItem<String>(
+  //                             value: manager['email'] as String?,
+  //                             child: Text(
+  //                                 manager['email'] as String? ?? 'Unknown'),
+  //                           );
+  //                         }).toList(),
+  //                         onChanged: (value) {
+  //                           setState(() {
+  //                             selectedManager = value;
+  //                           });
+  //                         },
+  //                       );
+  //                     },
+  //                   ),
+  //                   const SizedBox(height: 16),
+  //                   FutureBuilder(
+  //                     future: FirebaseFirestore.instance
+  //                         .collection('users')
+  //                         .where("role", isEqualTo: "developer")
+  //                         .get(),
+  //                     builder:
+  //                         (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+  //                       if (snapshot.connectionState ==
+  //                           ConnectionState.waiting) {
+  //                         return const Center(
+  //                             child: CircularProgressIndicator());
+  //                       }
+  //                       if (snapshot.hasError) {
+  //                         return Center(
+  //                             child: Text('Error: ${snapshot.error}'));
+  //                       }
+  //                       if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+  //                         return const Text('No developers available');
+  //                       }
+  //                       final developers = snapshot.data!.docs;
+  //                       return DropdownButton<String>(
+  //                         hint: const Text('Assign to Developer'),
+  //                         value: selectedDeveloper,
+  //                         items: developers.map((doc) {
+  //                           final developer =
+  //                               doc.data() as Map<String, dynamic>;
+  //                           return DropdownMenuItem<String>(
+  //                             value: developer['email'] as String?,
+  //                             child: Text(
+  //                                 developer['email'] as String? ?? 'Unknown'),
+  //                           );
+  //                         }).toList(),
+  //                         onChanged: (value) {
+  //                           setState(() {
+  //                             selectedDeveloper = value;
+  //                           });
+  //                         },
+  //                       );
+  //                     },
+  //                   ),
+  //                   const SizedBox(height: 16),
+  //                   Row(
+  //                     children: [
+  //                       Expanded(
+  //                         child: Text(
+  //                           selectedDeadline == null
+  //                               ? 'Select Deadline'
+  //                               : DateFormat.yMd().format(selectedDeadline!),
+  //                         ),
+  //                       ),
+  //                       IconButton(
+  //                         icon: const Icon(Icons.calendar_today),
+  //                         onPressed: () async {
+  //                           final pickedDate = await showDatePicker(
+  //                             context: context,
+  //                             initialDate: selectedDeadline ?? DateTime.now(),
+  //                             firstDate: DateTime.now(),
+  //                             lastDate: DateTime(2100),
+  //                           );
+  //                           if (pickedDate != null) {
+  //                             setState(() {
+  //                               selectedDeadline = pickedDate;
+  //                             });
+  //                           }
+  //                         },
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ],
+  //               ),
+  //             ),
+  //             actions: [
+  //               TextButton(
+  //                 onPressed: () => Navigator.of(context).pop(),
+  //                 child: const Text(
+  //                   'Cancel',
+  //                   style: TextStyle(
+  //                       fontSize: 16,
+  //                       fontWeight: FontWeight.w500,
+  //                       color: Colors.black),
+  //                 ),
+  //               ),
+  //               TextButton(
+  //                 onPressed: () {
+  //                   final updatedTask = {
+  //                     'name': nameController.text,
+  //                     'description': descriptionController.text,
+  //                     'assignedTo': selectedDeveloper ?? 'Unassigned',
+  //                     'assignedBy': selectedManager ?? 'Unknown',
+  //                     'status': selectedStatus ?? 'Open', // Add status
+  //                     'deadline': selectedDeadline ?? DateTime.now(),
+  //                   };
+  //
+  //                   FirebaseFirestore.instance
+  //                       .collection('tasks')
+  //                       .doc(task.id)
+  //                       .update(updatedTask)
+  //                       .catchError((error) {
+  //                     ScaffoldMessenger.of(context).showSnackBar(
+  //                       SnackBar(
+  //                           content: Text('Failed to update task: $error')),
+  //                     );
+  //                   });
+  //
+  //                   Navigator.of(context).pop();
+  //                 },
+  //                 child: const Text(
+  //                   'Update Task',
+  //                   style: TextStyle(
+  //                       fontSize: 18,
+  //                       fontWeight: FontWeight.w600,
+  //                       color: Colors.black),
+  //                 ),
+  //               ),
+  //             ],
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
 
   void _deleteTask(BuildContext context, String taskId) {
     showDialog(
