@@ -6,14 +6,14 @@ class UserManagementPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('User Management')),
+      appBar: AppBar(title: const Text('User Management')),
       body: ListView(
         children: [
           ListTile(
-            title: Text('John Doe'),
-            subtitle: Text('Role: Developer'),
+            title: const Text('John Doe'),
+            subtitle: const Text('Role: Developer'),
             trailing: IconButton(
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit),
               onPressed: () {
                 // Handle user edit
               },

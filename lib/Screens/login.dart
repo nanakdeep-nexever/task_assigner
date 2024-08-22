@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
                 '/developer',
                 arguments: state.userId.toString(),
               );
-            } else {
+            } else if (state.userId == 'viewer') {
               Navigator.pushReplacementNamed(
                 context,
                 '/viewer',

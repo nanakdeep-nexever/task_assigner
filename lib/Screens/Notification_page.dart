@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 
 class NotificationPage extends StatelessWidget {
+  const NotificationPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Notifications')),
+      appBar: AppBar(title: const Text('Notifications')),
       body: ListView(
-        children: [
+        children: const [
           ListTile(
             title: Text('Task Assignment'),
             subtitle: Text('You have been assigned a new task.'),

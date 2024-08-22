@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 
 class TaskManagementPage extends StatelessWidget {
+  const TaskManagementPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Task Management')),
+      appBar: AppBar(title: const Text('Task Management')),
       body: ListView(
         children: [
           ListTile(
-            title: Text('Task 1'),
-            subtitle: Text('Assigned to Developer A'),
+            title: const Text('Task 1'),
+            subtitle: const Text('Assigned to Developer A'),
             trailing: IconButton(
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit),
               onPressed: () {
                 // Handle task edit
               },

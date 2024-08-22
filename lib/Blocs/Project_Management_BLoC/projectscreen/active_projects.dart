@@ -134,7 +134,7 @@ class ActiveProjectsPage extends StatelessWidget {
     final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) {
-        return _ProjectDialog();
+        return const _ProjectDialog();
       },
     );
 

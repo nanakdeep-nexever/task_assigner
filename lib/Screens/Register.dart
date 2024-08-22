@@ -101,7 +101,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 16.0),
+                        const SizedBox(height: 16.0),
                         TextFormField(
                           controller: _passwordController,
                           decoration: const InputDecoration(
@@ -129,7 +129,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         SizedBox(
                           height: 50,
                           width: double.infinity,

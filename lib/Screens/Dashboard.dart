@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
@@ -16,7 +18,7 @@ class _DashboardPageState extends State<DashboardPage> {
             child: Card(
               child: ListTile(
                 title: Text('Overall Task Status $uid'),
-                subtitle: Text('Summary of tasks and projects'),
+                subtitle: const Text('Summary of tasks and projects'),
               ),
             ),
           ),

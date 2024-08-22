@@ -49,6 +49,25 @@ class UserRoleManager {
     }
   }
 
+  bool isViewer() {
+    String role = currentRole.toString();
+    return role == 'viewer';
+  }
+
+  bool isManager() {
+    String role = currentRole.toString();
+    return role == 'manager';
+  }
+
+  bool isAdmin() {
+    String role = currentRole.toString();
+    if (role == 'admin') {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   // Dispose the StreamController when not needed
   void dispose() {
     _roleController.close();

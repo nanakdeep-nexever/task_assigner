@@ -25,7 +25,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
         await _firebaseFirestore.collection('tasks').add(event.task);
         add(LoadTasks()); // Reload tasks
       } catch (e) {
-        yield TaskError('Failed to add task');
+        yield const TaskError('Failed to add task');
       }
     } else if (event is UpdateTask) {
       try {
@@ -35,14 +35,14 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
             .update(event.updatedTask);
         add(LoadTasks()); // Reload tasks
       } catch (e) {
-        yield TaskError('Failed to update task');
+        yield const TaskError('Failed to update task');
       }
     } else if (event is DeleteTask) {
       try {
         await _firebaseFirestore.collection('tasks').doc(event.taskId).delete();
         add(LoadTasks()); // Reload tasks
       } catch (e) {
-        yield TaskError('Failed to delete task');
+        yield const TaskError('Failed to delete task');
       }
     }
   }

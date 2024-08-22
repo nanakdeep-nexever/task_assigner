@@ -401,7 +401,7 @@ class AdminPageState extends State<AdminPage> {
 
                         return ListView.builder(
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: users.length,
+                          itemCount: users.take(2).length,
                           itemBuilder: (context, index) {
                             final user = users[index];
                             final uid = user.id;
@@ -503,7 +503,7 @@ class AdminPageState extends State<AdminPage> {
 
                         return ListView.builder(
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: users.length,
+                          itemCount: users.take(2).length,
                           itemBuilder: (context, index) {
                             final user = users[index];
                             final uid = user.id;

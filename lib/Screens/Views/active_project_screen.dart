@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'check_role.dart';
+
 class ActiveProjectsScreen extends StatelessWidget {
   final Stream<int> activeProjectsStream;
 
@@ -87,25 +89,27 @@ class ActiveProjectsScreen extends StatelessWidget {
                                 color: Colors.black)),
                       ],
                     ),
-                    trailing: PopupMenuButton<String>(
-                      onSelected: (value) {
-                        if (value == 'edit') {
-                          _editProject(context, project.id);
-                        } else if (value == 'delete') {
-                          _deleteProject(context, project.id);
-                        }
-                      },
-                      itemBuilder: (BuildContext context) => [
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: Text('Edit'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Text('Delete'),
-                        ),
-                      ],
-                    ),
+                    trailing: isViewer()
+                        ? null
+                        : PopupMenuButton<String>(
+                            onSelected: (value) {
+                              if (value == 'edit') {
+                                _editProject(context, project.id);
+                              } else if (value == 'delete') {
+                                _deleteProject(context, project.id);
+                              }
+                            },
+                            itemBuilder: (BuildContext context) => [
+                              const PopupMenuItem(
+                                value: 'edit',
+                                child: Text('Edit'),
+                              ),
+                              const PopupMenuItem(
+                                value: 'delete',
+                                child: Text('Delete'),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
               );
@@ -113,11 +117,13 @@ class ActiveProjectsScreen extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.orange,
-        onPressed: () => _addProject(context),
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: isAdmin() || isManager()
+          ? FloatingActionButton(
+              backgroundColor: Colors.orange,
+              onPressed: () => _addProject(context),
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 
@@ -227,6 +233,27 @@ class ActiveProjectsScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  bool isViewer() {
+    String role = UserRoleManager().currentRole.toString();
+    return role == 'viewer';
+  }
+
+  bool isManager() {
+    String role = UserRoleManager().currentRole.toString();
+    return role == 'manager';
+  }
+
+  bool isAdmin() {
+    UserRoleManager().init();
+    String role = UserRoleManager().currentRole.toString();
+    return role == 'admin';
+  }
+
+  bool isDevloper() {
+    String role = UserRoleManager().currentRole.toString();
+    return role == 'developer';
   }
 
   void _editProject(BuildContext context, String projectId) {

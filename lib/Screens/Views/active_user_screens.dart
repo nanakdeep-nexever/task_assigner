@@ -370,7 +370,7 @@ class ActiveUsersScreen extends StatelessWidget {
                       child: Text("${index + 1}"),
                     ),
                     title: Text(
-                      "Email: ${email}",
+                      "Email: $email",
                       style: const TextStyle(
                           fontWeight: FontWeight.w600, color: Colors.black),
                     ),

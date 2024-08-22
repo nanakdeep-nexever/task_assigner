@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 
 class ProjectManagementPage extends StatelessWidget {
+  const ProjectManagementPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Project Management')),
+      appBar: AppBar(title: const Text('Project Management')),
       body: ListView(
         children: [
           ListTile(
-            title: Text('Project A'),
-            subtitle: Text('Description of Project A'),
+            title: const Text('Project A'),
+            subtitle: const Text('Description of Project A'),
             trailing: IconButton(
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit),
               onPressed: () {
                 // Handle project edit
               },

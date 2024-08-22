@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../Screens/Notification_Handle/Notification_Handle.dart';
 import '../../Screens/Views/check_role.dart';
 import 'authentication_event.dart';
 import 'authentication_state.dart';
@@ -39,6 +40,12 @@ class AuthenticationBloc
             .collection('users')
             .doc(userCredential.user!.uid)
             .get();
+        if (NotificationHandler.token.toString().isNotEmpty) {
+          await _firestore
+              .collection('users')
+              .doc(userCredential.user!.uid)
+              .update({'FCM-token': NotificationHandler.token});
+        }
         String? role;
         if (userDoc.data() != null) {
           role = userDoc['role'];
@@ -75,7 +82,8 @@ class AuthenticationBloc
           await _firebaseAuth.createUserWithEmailAndPassword(
               email: event.email, password: event.password);
 
-      if (_firebaseAuth.currentUser?.uid != null) {
+      if (_firebaseAuth.currentUser?.uid != null &&
+          NotificationHandler.token.toString().isNotEmpty) {
         _firestore
             .collection('users')
             .doc(_firebaseAuth.currentUser?.uid.toString())
@@ -120,7 +128,7 @@ class AuthenticationBloc
 
   FutureOr<void> rolechange(
       AuthenticationRoleChanged event, Emitter<AuthenticationState> emit) {
-    print("object bloc ${event.role}");
+    print("Role is ${event.role}");
     emit(Rolechanged(role: event.role));
   }
 

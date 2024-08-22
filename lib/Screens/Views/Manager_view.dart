@@ -8,7 +8,6 @@ import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import 'active_project_screen.dart';
 import 'active_task_screen.dart';
-import 'active_user_screens.dart';
 
 class ManagerPage extends StatefulWidget {
   const ManagerPage({super.key});
@@ -131,7 +130,7 @@ class ManagerPageState extends State<ManagerPage> {
                   ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height *
-                        0.3, // Adjust height as needed
+                        0.15, // Adjust height as needed
                     child: GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
@@ -142,25 +141,14 @@ class ManagerPageState extends State<ManagerPage> {
                         mainAxisSpacing: 8.0,
                       ),
                       itemBuilder: (context, index) {
-                        final titles = [
-                          'Active Users',
-                          'Active Tasks',
-                          'Active Projects'
-                        ];
-                        final colors = [
-                          Colors.blue,
-                          Colors.green,
-                          Colors.orange
-                        ];
+                        final titles = ['Active Tasks', 'Active Projects'];
+                        final colors = [Colors.green, Colors.orange];
 
                         final streams = [
-                          _activeUsersStream,
                           _activeTasksStream,
                           _activeProjectsStream,
                         ];
-
                         final screens = [
-                          ActiveUsersScreen(activeUsersStream: _usersStream),
                           ActiveTasksScreen(
                             activeTasksStream: _activeTasksStream,
                           ),
@@ -237,121 +225,10 @@ class ManagerPageState extends State<ManagerPage> {
                           ),
                         );
                       },
-                      itemCount: 3,
+                      itemCount: 2,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Active Users",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                            fontSize: 18),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ActiveUsersScreen(
-                                      activeUsersStream: _usersStream)));
-                        },
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => ActiveUsersScreen(
-                                        activeUsersStream: _usersStream)));
-                          },
-                          child: const Text(
-                            "See all",
-                            style: TextStyle(
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                                fontSize: 18),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 4.4,
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: _usersStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        }
-
-                        final users = snapshot.data?.docs ?? [];
-
-                        return ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: users.take(2).length,
-                          itemBuilder: (context, index) {
-                            final user = users[index];
-                            final uid = user.id;
-                            final role = user['role'] ?? 'viewer';
-
-                            return Card(
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.blue.withOpacity(0.1),
-                                        Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.blue,
-                                      child: Text("${index + 1}"),
-                                    ),
-                                    title: Text(
-                                      "Email: ${user['email'] ?? 'No Email'}",
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    subtitle: Text(
-                                      ' Role: $role',
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ));
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -401,7 +278,7 @@ class ManagerPageState extends State<ManagerPage> {
 
                         return ListView.builder(
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: users.length,
+                          itemCount: users.take(2).length,
                           itemBuilder: (context, index) {
                             final user = users[index];
                             final uid = user.id;
@@ -503,7 +380,7 @@ class ManagerPageState extends State<ManagerPage> {
 
                         return ListView.builder(
                           physics: const NeverScrollableScrollPhysics(),
-                          itemCount: users.length,
+                          itemCount: users.take(2).length,
                           itemBuilder: (context, index) {
                             final user = users[index];
                             final uid = user.id;
