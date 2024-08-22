@@ -10,6 +10,7 @@ import 'package:get_it/get_it.dart';
 import 'package:task_assign_app/Blocs/AUTHentication/authentication_bloc.dart';
 import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
 import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
+import 'package:task_assign_app/Blocs/Profile_bloc/profile_bloc.dart';
 import 'package:task_assign_app/Blocs/Project_Management_BLoC/project_manage_bloc.dart';
 import 'package:task_assign_app/Blocs/Task_Management_BLoC/task_bloc.dart';
 import 'package:task_assign_app/Screens/Views/reset_password_screen.dart';
@@ -26,6 +27,7 @@ import 'Screens/User_managment.dart';
 import 'Screens/Views/Admin.dart';
 import 'Screens/Views/Devloper_view.dart';
 import 'Screens/Views/Manager_view.dart';
+import 'Screens/Views/complete_profile_screen.dart';
 import 'Screens/Views/splash_screen.dart';
 import 'Screens/Views/viewer_view.dart';
 import 'Screens/login.dart';
@@ -162,6 +164,9 @@ class MyApp extends StatelessWidget {
         BlocProvider(
           create: (context) => TaskBloc(),
         ),
+        BlocProvider(
+          create: (context) => ProfileBloc(),
+        ),
       ],
       child: MaterialApp(
         navigatorKey: AppConfig.navigatorKey,
@@ -197,14 +202,14 @@ class MyApp extends StatelessWidget {
               return getRoute(settings, (_) => const NotificationPage());
             case '/forgot_password':
               return getRoute(settings, (_) => const ResetPasswordScreen());
+            case '/completeProfile':
+              return getRoute(settings, (_) => CompleteProfileScreen());
             case '/profile':
               return getRoute(settings, (_) {
                 Map<String, dynamic>? data =
                     settings.arguments as Map<String, dynamic>?;
                 return ProfileSection(
                   heading: data?['heading'] ?? "",
-                  uName: data?['uName'] ?? "",
-                  email: data?['email'] ?? "",
                 );
               });
             // Ensure that 'heading' is correctly passed

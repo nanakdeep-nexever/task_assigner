@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
+import '../../commons/function.dart';
 import 'active_project_screen.dart';
 import 'active_task_screen.dart';
 
@@ -95,6 +96,25 @@ class ViewerPageState extends State<ViewerPage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              icon: Image.asset(
+                "assets/images/user.png",
+                height: 30,
+                width: 30,
+              ),
+              onPressed: () {
+                pushNamed(
+                  context,
+                  "/profile",
+                  {
+                    'heading': "Viewer Profile",
+                    "uName": FirebaseAuth.instance.currentUser?.displayName ??
+                        "Akash",
+                    "email": FirebaseAuth.instance.currentUser?.email
+                  },
+                );
+              },
+            ),
             automaticallyImplyLeading: false,
             centerTitle: true,
             title: const Text(

@@ -25,7 +25,8 @@ class _RegisterPageState extends State<RegisterPage> {
       body: BlocConsumer<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
           if (state is AuthenticationAuthenticated) {
-            if (state.userId == 'admin') {
+            Navigator.pushNamed(context, "/completeProfile");
+            /*     if (state.userId == 'admin') {
               Navigator.pushReplacementNamed(
                 context,
                 '/admin',
@@ -49,18 +50,14 @@ class _RegisterPageState extends State<RegisterPage> {
                 '/viewer',
                 arguments: state.userId.toString(),
               );
-            }
+            }*/
           } else if (state is AuthenticationError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(content: Text("Already Registered")),
             );
           }
         },
         builder: (context, state) {
-          if (state is AuthenticationLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           return SafeArea(
             child: SingleChildScrollView(
               child: Center(
@@ -168,7 +165,11 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               elevation: 5,
                             ),
-                            child: const Text('Register'),
+                            child: state is AuthenticationLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator(),
+                                  )
+                                : const Text('Register'),
                           ),
                         ),
                         const SizedBox(height: 16.0),

@@ -51,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
             }
           } else if (state is AuthenticationError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              const SnackBar(content: Text(" Invalid Credential")),
             );
           }
         },
@@ -117,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                                   : Icons.visibility_off),
                             ),
                             labelText: 'Password',
-                            labelStyle: TextStyle(color: Colors.black),
+                            labelStyle: const TextStyle(color: Colors.black),
                             border: const OutlineInputBorder(),
                             focusedBorder: const OutlineInputBorder(
                               borderSide:
@@ -128,7 +128,7 @@ class _LoginPageState extends State<LoginPage> {
                                   BorderSide(color: Colors.grey, width: 1.0),
                             ),
                             contentPadding:
-                                EdgeInsets.symmetric(horizontal: 16.0),
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                           ),
                           obscureText: !isPasswordVisible,
                           validator: (value) {
@@ -176,6 +176,8 @@ class _LoginPageState extends State<LoginPage> {
                                       LoginEvent(
                                           email: email, password: password),
                                     );
+                                _emailController.clear();
+                                _passwordController.clear();
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -191,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             child: state is AuthenticationLoading
                                 ? const CircularProgressIndicator()
-                                : Text('Login'),
+                                : const Text('Login'),
                           ),
                         ),
                         const SizedBox(height: 16.0),

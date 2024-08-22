@@ -71,7 +71,8 @@ class DeveloperPageState extends State<DeveloperPage> {
                   "/profile",
                   {
                     'heading': "Developer Profile",
-                    'list': [344, 234, 23432, 43, 434, 234]
+                    "uName": " Akash",
+                    "email": "jddhfj@gmail.com"
                   },
                 );
               },
