@@ -133,6 +133,22 @@ class ActiveProjectsScreen extends StatelessWidget {
                     const Icon(Icons.notifications_active, color: Colors.red)
                 ],
               ),
+              FutureBuilder<String?>(
+                future: getManagerEmail(projectData["manager_id"] ?? ''),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return Text(
+                      snapshot.data != null
+                          ? 'Manager: ${snapshot.data}'
+                          : 'Unassigned Manager',
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w500, color: Colors.black),
+                    );
+                  } else {
+                    return const Text('Unassigned Manager');
+                  }
+                },
+              ),
               Text(
                   projectData["description"] != null
                       ? 'Description: ${projectData['description']}'
@@ -228,5 +244,22 @@ class ActiveProjectsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<String?> getManagerEmail(String managerId) async {
+    try {
+      DocumentSnapshot managerDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(managerId)
+          .get();
+
+      if (managerDoc.exists) {
+        return managerDoc.get('email') as String?;
+      } else {
+        return 'No email found'; // Or handle as needed
+      }
+    } catch (e) {
+      return 'Unassigned Manager'; // Or handle as needed
+    }
   }
 }
