@@ -11,6 +11,7 @@ import 'package:task_assign_app/Blocs/AUTHentication/authentication_bloc.dart';
 import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
 import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
 import 'package:task_assign_app/Blocs/Project_Management_BLoC/project_manage_bloc.dart';
+import 'package:task_assign_app/Blocs/Rolecube.dart';
 import 'package:task_assign_app/Blocs/Task_Management_BLoC/task_bloc.dart';
 import 'package:task_assign_app/Screens/Views/Admin.dart';
 import 'package:task_assign_app/Screens/Views/Devloper_view.dart';
@@ -159,6 +160,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => TaskBloc(),
+        ),
+        BlocProvider(
+          create: (context) => RoleCubit(),
         ),
       ],
       child: MaterialApp(

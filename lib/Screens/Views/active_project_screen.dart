@@ -7,16 +7,10 @@ import 'check_role.dart';
 class ActiveProjectsScreen extends StatelessWidget {
   final Stream<int> activeProjectsStream;
   ActiveProjectsScreen({super.key, required this.activeProjectsStream});
-  final UserRoleManager userRoleManager = UserRoleManager();
-
-  bool isViewer() => userRoleManager.currentRole == 'viewer';
-  bool isManager() => userRoleManager.currentRole == 'manager';
-  bool isAdmin() => userRoleManager.currentRole == 'admin';
-  bool isDeveloper() => userRoleManager.currentRole == 'developer';
 
   @override
   Widget build(BuildContext context) {
-    userRoleManager.init();
+    UserRoleManager().init();
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -54,18 +48,19 @@ class ActiveProjectsScreen extends StatelessWidget {
           );
         },
       ),
-      floatingActionButton: isAdmin() || isManager()
-          ? FloatingActionButton(
-              backgroundColor: Colors.orange,
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => ProjectFormPage()),
-                );
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton:
+          UserRoleManager().isAdmin() || UserRoleManager().isManager()
+              ? FloatingActionButton(
+                  backgroundColor: Colors.orange,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ProjectFormPage()),
+                    );
+                  },
+                  child: const Icon(Icons.add),
+                )
+              : null,
     );
   }
 
@@ -157,7 +152,7 @@ class ActiveProjectsScreen extends StatelessWidget {
                       fontWeight: FontWeight.w500, color: Colors.black)),
             ],
           ),
-          trailing: isViewer()
+          trailing: UserRoleManager().isViewer()
               ? null
               : PopupMenuButton<String>(
                   onSelected: (value) {

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:task_assign_app/Screens/Notification_Handle/Notification_Handle.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 
 class ActiveUsersScreen extends StatelessWidget {
@@ -83,6 +84,18 @@ class ActiveUsersScreen extends StatelessWidget {
       await _firestore.collection('users').doc(uid).update({
         'role': newRole,
       });
+      final snapshot =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (snapshot.exists) {
+        String fcmManager = snapshot.get('FCM-token');
+        if (fcmManager.isNotEmpty) {
+          NotificationHandler.sendNotification(
+              FCM_token: fcmManager.toString(),
+              title: "Role Changed",
+              body:
+                  "New Role $newRole Updated By ${FirebaseAuth.instance.currentUser?.email}");
+        }
+      }
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Role updated successfully')));
     } catch (e) {
