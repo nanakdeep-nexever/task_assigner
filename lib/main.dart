@@ -12,12 +12,7 @@ import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
 import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
 import 'package:task_assign_app/Blocs/Project_Management_BLoC/project_manage_bloc.dart';
 import 'package:task_assign_app/Blocs/Task_Management_BLoC/task_bloc.dart';
-import 'package:task_assign_app/Screens/Views/Admin.dart';
-import 'package:task_assign_app/Screens/Views/Devloper_view.dart';
-import 'package:task_assign_app/Screens/Views/Manager_view.dart';
 import 'package:task_assign_app/Screens/Views/reset_password_screen.dart';
-import 'package:task_assign_app/Screens/Views/splash_screen.dart';
-import 'package:task_assign_app/Screens/Views/viewer_view.dart';
 
 import 'Blocs/Messaging.dart';
 import 'Screens/Dashboard.dart';
@@ -28,7 +23,13 @@ import 'Screens/Register.dart';
 import 'Screens/Role_manage.dart';
 import 'Screens/Taskmanagement.dart';
 import 'Screens/User_managment.dart';
+import 'Screens/Views/Admin.dart';
+import 'Screens/Views/Devloper_view.dart';
+import 'Screens/Views/Manager_view.dart';
+import 'Screens/Views/splash_screen.dart';
+import 'Screens/Views/viewer_view.dart';
 import 'Screens/login.dart';
+import 'commons/profile_section.dart';
 import 'firebase_options.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -166,23 +167,77 @@ class MyApp extends StatelessWidget {
         navigatorKey: AppConfig.navigatorKey,
         title: 'TaskAssignPro',
         initialRoute: '/splash',
-        routes: {
-          '/': (context) => const LoginPage(),
-          '/splash': (context) => const SplashScreen(),
-          '/register': (context) => const RegisterPage(),
-          '/admin': (context) => const AdminPage(),
-          '/manager': (context) => const ManagerPage(),
-          '/developer': (context) => const DeveloperPage(),
-          '/viewer': (context) => const ViewerPage(),
-          '/dashboard': (context) => const DashboardPage(),
-          '/projects': (context) => const ProjectManagementPage(),
-          '/tasks': (context) => const TaskManagementPage(),
-          '/users': (context) => const UserManagementPage(),
-          '/roles': (context) => const RoleManagementPage(),
-          '/notifications': (context) => const NotificationPage(),
-          '/forgot_password': (context) => const ResetPasswordScreen(),
+        onGenerateRoute: (settings) {
+          switch (settings.name) {
+            case '/':
+              return getRoute(settings, (_) => const LoginPage());
+            case '/splash':
+              return getRoute(settings, (_) => const SplashScreen());
+            case '/register':
+              return getRoute(settings, (_) => const RegisterPage());
+            case '/admin':
+              return getRoute(settings, (_) => const AdminPage());
+            case '/manager':
+              return getRoute(settings, (_) => const ManagerPage());
+            case '/developer':
+              return getRoute(settings, (_) => const DeveloperPage());
+            case '/viewer':
+              return getRoute(settings, (_) => const ViewerPage());
+            case '/dashboard':
+              return getRoute(settings, (_) => const DashboardPage());
+            case '/projects':
+              return getRoute(settings, (_) => const ProjectManagementPage());
+            case '/tasks':
+              return getRoute(settings, (_) => const TaskManagementPage());
+            case '/users':
+              return getRoute(settings, (_) => const UserManagementPage());
+            case '/roles':
+              return getRoute(settings, (_) => const RoleManagementPage());
+            case '/notifications':
+              return getRoute(settings, (_) => const NotificationPage());
+            case '/forgot_password':
+              return getRoute(settings, (_) => const ResetPasswordScreen());
+            case '/profile':
+              return getRoute(settings, (_) {
+                Map<String, dynamic>? data =
+                    settings.arguments as Map<String, dynamic>?;
+                return ProfileSection(
+                  heading: data?['heading'] ?? "",
+                  uName: data?['uName'] ?? "",
+                  email: data?['email'] ?? "",
+                );
+              });
+            // Ensure that 'heading' is correctly passed
+            default:
+              return getRoute(settings, (_) => const SplashScreen());
+          }
         },
+
+        // routes: {
+        //   '/': (context) => const LoginPage(),
+        //   '/splash': (context) => const SplashScreen(),
+        //   '/register': (context) => const RegisterPage(),
+        //   '/admin': (context) => const AdminPage(),
+        //   '/manager': (context) => const ManagerPage(),
+        //   '/developer': (context) => const DeveloperPage(),
+        //   '/viewer': (context) => const ViewerPage(),
+        //   '/dashboard': (context) => const DashboardPage(),
+        //   '/projects': (context) => const ProjectManagementPage(),
+        //   '/tasks': (context) => const TaskManagementPage(),
+        //   '/users': (context) => const UserManagementPage(),
+        //   '/roles': (context) => const RoleManagementPage(),
+        //   '/notifications': (context) => const NotificationPage(),
+        //   '/forgot_password': (context) => const ResetPasswordScreen(),
+        //   '/profile': (context) => const ProfileSection(heading: heading),
+        // },
       ),
+    );
+  }
+
+  Route<dynamic> getRoute(RouteSettings settings, WidgetBuilder builder) {
+    return MaterialPageRoute(
+      builder: builder,
+      settings: settings,
     );
   }
 }

@@ -29,6 +29,10 @@ class PasswordResetEvent extends AuthenticationEvent {
 
 class TogglePasswordVisibilityEvent extends AuthenticationEvent {}
 
+class DeleteAccountEvent extends AuthenticationEvent {
+  DeleteAccountEvent(String userId);
+}
+
 class AuthenticationRoleChanged extends AuthenticationEvent {
   final String role;
 

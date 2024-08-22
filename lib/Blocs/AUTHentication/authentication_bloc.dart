@@ -23,6 +23,7 @@ class AuthenticationBloc
     on<LogoutEvent>(_Logout);
     on<PasswordResetEvent>(_PassReset);
     on<AuthenticationRoleChanged>(rolechange);
+    on<DeleteAccountEvent>(_DeleteAccount);
     on<TogglePasswordVisibilityEvent>(_togglePasswordVisibility);
     _roleSubscription = UserRoleManager().roleStream.listen((role) {
       add(AuthenticationRoleChanged(role!));
@@ -139,6 +140,25 @@ class AuthenticationBloc
       emit(PasswordResetEmailSent()); // Emit success state
     } catch (e) {
       emit(PasswordResetError(message: e.toString())); // Emit error state
+    }
+  }
+
+  FutureOr<void> _DeleteAccount(
+      DeleteAccountEvent event, Emitter<AuthenticationState> emit) async {
+    emit(AuthenticationLoading());
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).delete();
+
+        await user.delete();
+
+        emit(AuthenticationUnauthenticated());
+      } else {
+        emit(AuthenticationError(message: "No user currently authenticated"));
+      }
+    } catch (e) {
+      emit(AuthenticationError(message: e.toString()));
     }
   }
 

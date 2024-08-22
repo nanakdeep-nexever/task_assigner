@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
+import '../../commons/function.dart';
 import 'active_task_screen.dart';
 
 class DeveloperPage extends StatefulWidget {
@@ -64,7 +65,16 @@ class DeveloperPageState extends State<DeveloperPage> {
                 height: 30,
                 width: 30,
               ),
-              onPressed: () {},
+              onPressed: () {
+                pushNamed(
+                  context,
+                  "/profile",
+                  {
+                    'heading': "Developer Profile",
+                    'list': [344, 234, 23432, 43, 434, 234]
+                  },
+                );
+              },
             ),
             automaticallyImplyLeading: false,
             centerTitle: true,
