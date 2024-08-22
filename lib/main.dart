@@ -15,6 +15,7 @@ import 'package:task_assign_app/Blocs/Task_Management_BLoC/task_bloc.dart';
 import 'package:task_assign_app/Screens/Views/Admin.dart';
 import 'package:task_assign_app/Screens/Views/Devloper_view.dart';
 import 'package:task_assign_app/Screens/Views/Manager_view.dart';
+import 'package:task_assign_app/Screens/Views/reset_password_screen.dart';
 import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 import 'package:task_assign_app/Screens/Views/viewer_view.dart';
 
@@ -179,6 +180,7 @@ class MyApp extends StatelessWidget {
           '/users': (context) => const UserManagementPage(),
           '/roles': (context) => const RoleManagementPage(),
           '/notifications': (context) => const NotificationPage(),
+          '/forgot_password': (context) => const ResetPasswordScreen(),
         },
       ),
     );

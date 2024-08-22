@@ -58,6 +58,14 @@ class DeveloperPageState extends State<DeveloperPage> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
+            leading: IconButton(
+              icon: Image.asset(
+                "assets/images/user.png",
+                height: 30,
+                width: 30,
+              ),
+              onPressed: () {},
+            ),
             automaticallyImplyLeading: false,
             centerTitle: true,
             title: const Text(

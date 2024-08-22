@@ -11,6 +11,7 @@ import 'authentication_state.dart';
 
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
+  bool _isPasswordVisible = false;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   late StreamSubscription<String?> _roleSubscription;
@@ -22,6 +23,7 @@ class AuthenticationBloc
     on<LogoutEvent>(_Logout);
     on<PasswordResetEvent>(_PassReset);
     on<AuthenticationRoleChanged>(rolechange);
+    on<TogglePasswordVisibilityEvent>(_togglePasswordVisibility);
     _roleSubscription = UserRoleManager().roleStream.listen((role) {
       add(AuthenticationRoleChanged(role!));
     });
@@ -112,6 +114,12 @@ class AuthenticationBloc
     }
   }
 
+  FutureOr<void> _togglePasswordVisibility(
+      TogglePasswordVisibilityEvent event, Emitter<AuthenticationState> emit) {
+    _isPasswordVisible = !_isPasswordVisible;
+    emit(PasswordVisibilityState(isPasswordVisible: _isPasswordVisible));
+  }
+
   FutureOr<void> _Logout(LogoutEvent event, Emitter<AuthenticationState> emit) {
     emit(AuthenticationLoading());
     _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
@@ -124,12 +132,20 @@ class AuthenticationBloc
   }
 
   FutureOr<void> _PassReset(
-      PasswordResetEvent event, Emitter<AuthenticationState> emit) {}
+      PasswordResetEvent event, Emitter<AuthenticationState> emit) async {
+    emit(AuthenticationLoading());
+    try {
+      await _firebaseAuth.sendPasswordResetEmail(email: event.email);
+      emit(PasswordResetEmailSent()); // Emit success state
+    } catch (e) {
+      emit(PasswordResetError(message: e.toString())); // Emit error state
+    }
+  }
 
   FutureOr<void> rolechange(
       AuthenticationRoleChanged event, Emitter<AuthenticationState> emit) {
     print("Role is ${event.role}");
-    emit(Rolechanged(role: event.role));
+    emit(RoleChanged(role: event.role));
   }
 
   @override

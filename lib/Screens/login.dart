@@ -56,8 +56,9 @@ class _LoginPageState extends State<LoginPage> {
           }
         },
         builder: (context, state) {
-          if (state is AuthenticationLoading) {
-            return const Center(child: CircularProgressIndicator());
+          bool isPasswordVisible = false;
+          if (state is PasswordVisibilityState) {
+            isPasswordVisible = state.isPasswordVisible;
           }
 
           return SafeArea(
@@ -104,22 +105,32 @@ class _LoginPageState extends State<LoginPage> {
                         const SizedBox(height: 16.0),
                         TextFormField(
                           controller: _passwordController,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
+                            suffixIcon: IconButton(
+                              onPressed: () {
+                                context
+                                    .read<AuthenticationBloc>()
+                                    .add(TogglePasswordVisibilityEvent());
+                              },
+                              icon: Icon(isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                            ),
                             labelText: 'Password',
                             labelStyle: TextStyle(color: Colors.black),
-                            border: OutlineInputBorder(),
-                            focusedBorder: OutlineInputBorder(
+                            border: const OutlineInputBorder(),
+                            focusedBorder: const OutlineInputBorder(
                               borderSide:
                                   BorderSide(color: Colors.blue, width: 2.0),
                             ),
-                            enabledBorder: OutlineInputBorder(
+                            enabledBorder: const OutlineInputBorder(
                               borderSide:
                                   BorderSide(color: Colors.grey, width: 1.0),
                             ),
                             contentPadding:
                                 EdgeInsets.symmetric(horizontal: 16.0),
                           ),
-                          obscureText: true,
+                          obscureText: !isPasswordVisible,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your password';
@@ -129,7 +140,30 @@ class _LoginPageState extends State<LoginPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 12),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Forgot Password?',
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Navigator.pushNamed(
+                                          context, '/forgot_password');
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
                         SizedBox(
                           height: 50,
                           width: double.infinity,
@@ -155,7 +189,9 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               elevation: 5,
                             ),
-                            child: const Text('Login'),
+                            child: state is AuthenticationLoading
+                                ? const CircularProgressIndicator()
+                                : Text('Login'),
                           ),
                         ),
                         const SizedBox(height: 16.0),
@@ -183,12 +219,10 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                         ),
+                        const SizedBox(height: 20),
                         if (state is AuthenticationUnauthenticated) ...[
                           const SizedBox(height: 16.0),
-                          const Text(
-                            'Please log in',
-                            style: TextStyle(color: Colors.red, fontSize: 16.0),
-                          ),
+                          Container()
                         ],
                       ],
                     ),

@@ -27,6 +27,8 @@ class PasswordResetEvent extends AuthenticationEvent {
   PasswordResetEvent({required this.email});
 }
 
+class TogglePasswordVisibilityEvent extends AuthenticationEvent {}
+
 class AuthenticationRoleChanged extends AuthenticationEvent {
   final String role;
 

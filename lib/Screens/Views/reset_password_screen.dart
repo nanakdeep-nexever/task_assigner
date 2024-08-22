@@ -1,55 +1,41 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task_assign_app/Blocs/AUTHentication/authentication_event.dart';
 
-import '../Blocs/AUTHentication/authentication_bloc.dart';
-import '../Blocs/AUTHentication/authentication_state.dart';
+import '../../Blocs/AUTHentication/authentication_bloc.dart';
+import '../../Blocs/AUTHentication/authentication_event.dart';
+import '../../Blocs/AUTHentication/authentication_state.dart';
 
-class RegisterPage extends StatefulWidget {
-  const RegisterPage({super.key});
+class ResetPasswordScreen extends StatefulWidget {
+  const ResetPasswordScreen({Key? key}) : super(key: key);
 
   @override
-  _RegisterPageState createState() => _RegisterPageState();
+  _ResetPasswordScreenState createState() => _ResetPasswordScreenState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Reset Password',
+          style: TextStyle(
+              fontWeight: FontWeight.w500, fontSize: 20, color: Colors.black),
+        ),
+      ),
       body: BlocConsumer<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
-          if (state is AuthenticationAuthenticated) {
-            if (state.userId == 'admin') {
-              Navigator.pushReplacementNamed(
-                context,
-                '/admin',
-                arguments: state.userId.toString(),
-              );
-            } else if (state.userId == 'manager') {
-              Navigator.pushReplacementNamed(
-                context,
-                '/manager',
-                arguments: state.userId.toString(),
-              );
-            } else if (state.userId == 'developer') {
-              Navigator.pushReplacementNamed(
-                context,
-                '/developer',
-                arguments: state.userId.toString(),
-              );
-            } else {
-              Navigator.pushReplacementNamed(
-                context,
-                '/viewer',
-                arguments: state.userId.toString(),
-              );
-            }
+          if (state is PasswordResetEmailSent) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Password reset email sent!')),
+            );
+            Navigator.pop(context);
           } else if (state is AuthenticationError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -65,15 +51,20 @@ class _RegisterPageState extends State<RegisterPage> {
             child: SingleChildScrollView(
               child: Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(16.0),
                   child: Form(
                     key: _formKey,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image.asset("assets/images/regis.png"),
-                        const SizedBox(height: 16.0),
+                        Image.asset(
+                          "assets/images/forgot.jpg",
+                          height: 300,
+                          width: double.infinity,
+                          fit: BoxFit.fill,
+                        ),
+                        const SizedBox(height: 20),
                         TextFormField(
                           controller: _emailController,
                           decoration: const InputDecoration(
@@ -102,46 +93,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 16.0),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            labelStyle: TextStyle(color: Colors.black),
-                            border: const OutlineInputBorder(),
-                            focusedBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.blue, width: 2.0),
-                            ),
-                            enabledBorder: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Colors.grey, width: 1.0),
-                            ),
-                            contentPadding:
-                                EdgeInsets.symmetric(horizontal: 16.0),
-                            suffixIcon: IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordVisible = !_isPasswordVisible;
-                                });
-                              },
-                              icon: Icon(
-                                _isPasswordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                            ),
-                          ),
-                          obscureText: !_isPasswordVisible,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
-                            } else if (value.length < 6) {
-                              return 'Password must be at least 6 characters long';
-                            }
-                            return null;
-                          },
-                        ),
                         const SizedBox(height: 20),
                         SizedBox(
                           height: 50,
@@ -150,10 +101,8 @@ class _RegisterPageState extends State<RegisterPage> {
                             onPressed: () {
                               if (_formKey.currentState?.validate() ?? false) {
                                 final email = _emailController.text;
-                                final password = _passwordController.text;
                                 context.read<AuthenticationBloc>().add(
-                                      RegisterEvent(
-                                          email: email, password: password),
+                                      PasswordResetEvent(email: email),
                                     );
                               }
                             },
@@ -168,7 +117,9 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               elevation: 5,
                             ),
-                            child: const Text('Register'),
+                            child: state is AuthenticationLoading
+                                ? const CircularProgressIndicator()
+                                : const Text('Send Reset Link'),
                           ),
                         ),
                         const SizedBox(height: 16.0),
@@ -176,12 +127,12 @@ class _RegisterPageState extends State<RegisterPage> {
                           text: TextSpan(
                             children: [
                               const TextSpan(
-                                text: 'Already have an account? ',
+                                text: 'Remember your password? ',
                                 style: TextStyle(
                                     color: Colors.black, fontSize: 16.0),
                               ),
                               TextSpan(
-                                text: 'Login',
+                                text: 'Login here',
                                 style: const TextStyle(
                                   color: Colors.blue,
                                   fontSize: 16.0,
@@ -196,13 +147,6 @@ class _RegisterPageState extends State<RegisterPage> {
                             ],
                           ),
                         ),
-                        if (state is AuthenticationUnauthenticated) ...[
-                          const SizedBox(height: 16.0),
-                          const Text(
-                            'Please register first',
-                            style: TextStyle(color: Colors.red, fontSize: 16.0),
-                          ),
-                        ],
                       ],
                     ),
                   ),

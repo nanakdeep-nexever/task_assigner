@@ -31,11 +31,31 @@ class AuthenticationError extends AuthenticationState {
   List<Object> get props => [message];
 }
 
-class Rolechanged extends AuthenticationState {
+class RoleChanged extends AuthenticationState {
   final String role;
 
-  Rolechanged({required this.role});
+  RoleChanged({required this.role});
 
   @override
   List<Object> get props => [role];
+}
+
+class PasswordVisibilityState extends AuthenticationState {
+  final bool isPasswordVisible;
+
+  PasswordVisibilityState({required this.isPasswordVisible});
+
+  @override
+  List<Object> get props => [isPasswordVisible];
+}
+
+class PasswordResetEmailSent extends AuthenticationState {}
+
+class PasswordResetError extends AuthenticationState {
+  final String message;
+
+  PasswordResetError({required this.message});
+
+  @override
+  List<Object> get props => [message];
 }

@@ -6,32 +6,24 @@ import 'package:firebase_auth/firebase_auth.dart';
 class UserRoleManager {
   static final UserRoleManager _instance = UserRoleManager._internal();
 
-  // Private constructor
   UserRoleManager._internal();
 
-  // Factory constructor
   factory UserRoleManager() {
     return _instance;
   }
 
-  // Firebase Auth and Firestore instances
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // StreamController to broadcast role updates
   final StreamController<String?> _roleController =
       StreamController<String?>.broadcast();
 
-  // Getter for the role stream
   Stream<String?> get roleStream => _roleController.stream;
 
-  // Current user role
   String? _currentRole;
 
-  // Getter for current user role
   String? get currentRole => _currentRole;
 
-  // Initialize and start listening to user role changes
   void init() {
     String? uid = _firebaseAuth.currentUser?.uid;
 
@@ -68,7 +60,6 @@ class UserRoleManager {
     }
   }
 
-  // Dispose the StreamController when not needed
   void dispose() {
     _roleController.close();
   }
