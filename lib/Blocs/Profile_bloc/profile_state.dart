@@ -21,7 +21,6 @@ class ProfileImagePicked extends ProfileState {
 }
 
 class UserProfileLoaded extends ProfileState {
-  // New state for loaded profile
   final String firstName;
   final String lastName;
   final String email;

@@ -1,40 +1,15 @@
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
-
-import 'Rolestate.dart';
 
 class RoleCubit extends Cubit<RoleState> {
   final UserRoleManager _userRoleManager = UserRoleManager();
 
-  RoleCubit() : super(RoleInitial()) {
+  RoleCubit() : super(RoleState(null)) {
     _userRoleManager.init();
     _userRoleManager.roleStream.listen((role) {
-      emit(RoleLoaded(role));
+      emit(RoleState(role));
     });
-  }
-
-  bool isViewer() {
-    final roleState = state;
-    if (roleState is RoleLoaded) {
-      return _userRoleManager.isViewer();
-    }
-    return false;
-  }
-
-  bool isManager() {
-    final roleState = state;
-    if (roleState is RoleLoaded) {
-      return _userRoleManager.isManager();
-    }
-    return false;
-  }
-
-  bool isAdmin() {
-    final roleState = state;
-    if (roleState is RoleLoaded) {
-      return _userRoleManager.isAdmin();
-    }
-    return false;
   }
 
   @override
@@ -42,4 +17,13 @@ class RoleCubit extends Cubit<RoleState> {
     _userRoleManager.dispose();
     return super.close();
   }
+}
+
+class RoleState extends Equatable {
+  final String? role;
+
+  RoleState(this.role);
+
+  @override
+  List<Object?> get props => [role];
 }

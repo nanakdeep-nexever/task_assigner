@@ -1,6 +1,11 @@
 import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+// Top-level or static function for background message handling
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling a background message: ${message.messageId}");
+}
 
 class MessagingBloc {
   final _messageStreamController = StreamController<RemoteMessage>.broadcast();
@@ -13,12 +18,6 @@ class MessagingBloc {
   }
   void addstream(RemoteMessage message) {
     _messageStreamController.add(message);
-  }
-
-  // Top-level or static function for background message handling
-  static Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
-    print("Handling a background message: ${message.messageId}");
   }
 
   // Uncomment and complete this method if you need to handle messages on app launch
