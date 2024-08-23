@@ -182,12 +182,6 @@ class AdminPageState extends State<AdminPage> {
                           ActiveProjectsScreen(),
                         ];
 
-                        /*  final screens = [
-                          const ActiveUserPage(),
-                          const ActiveTasksPage(),
-                          const ActiveProjectsPage()
-                        ];
-*/
                         return InkWell(
                           onTap: () {
                             Navigator.push(

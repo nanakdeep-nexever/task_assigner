@@ -29,7 +29,6 @@ class UserRoleManager {
 
     if (uid != null) {
       _firestore.collection('users').doc(uid).snapshots().listen((snapshot) {
-        print(snapshot);
         if (snapshot.exists) {
           _currentRole = snapshot.data()?['role'] as String?;
           _roleController.add(_currentRole);

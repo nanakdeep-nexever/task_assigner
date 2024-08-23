@@ -1,29 +1,45 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:task_assign_app/model/User.dart';
 
-abstract class UserState extends Equatable {
+abstract class ManagerState extends Equatable {
   @override
   List<Object> get props => [];
 }
 
-class UserInitial extends UserState {}
+class ManagerPageInitial extends ManagerState {}
 
-class UserLoading extends UserState {}
+class ManagerPageLoading extends ManagerState {}
 
-class UserLoaded extends UserState {
-  final List<User> users;
+class ManagerPageLoaded extends ManagerState {
+  final int activeUsers;
+  final int activeTasks;
+  final int activeProjects;
+  final List<QueryDocumentSnapshot> userTasks;
+  final List<QueryDocumentSnapshot> userProjects;
 
-  UserLoaded({required this.users});
+  ManagerPageLoaded({
+    required this.activeUsers,
+    required this.activeTasks,
+    required this.activeProjects,
+    required this.userTasks,
+    required this.userProjects,
+  });
 
   @override
-  List<Object> get props => [users];
+  List<Object> get props => [
+        activeUsers,
+        activeTasks,
+        activeProjects,
+        userTasks,
+        userProjects,
+      ];
 }
 
-class UserError extends UserState {
-  final String message;
+class ManagerPageError extends ManagerState {
+  final String error;
 
-  UserError({required this.message});
+  ManagerPageError(this.error);
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [error];
 }

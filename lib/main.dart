@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,10 +68,12 @@ class MyApp extends StatelessWidget {
   const MyApp({required this.messagingBloc, required this.notificationHandler});
   @override
   Widget build(BuildContext context) {
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => AuthenticationBloc()),
-        BlocProvider(create: (context) => UserBloc()),
+        BlocProvider(create: (context) => ManagerPageBloc(_firestore)),
+        // BlocProvider(create: (context) => AdminPageBloc(_firestore)),
         BlocProvider(create: (context) => NotificationBloc()),
         BlocProvider(create: (context) => ProjectBloc()),
         BlocProvider(create: (context) => TaskBloc()),

@@ -1,36 +1,17 @@
+// manager_page_event.dart
 import 'package:equatable/equatable.dart';
 
-abstract class UserEvent extends Equatable {
+abstract class ManagerPageEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
 
-class LoadUsersEvent extends UserEvent {}
+class LoadActiveUsers extends ManagerPageEvent {}
 
-class CreateUserEvent extends UserEvent {
-  final String name;
-  final String email;
-  final String roleId;
+class LoadActiveTasks extends ManagerPageEvent {}
 
-  CreateUserEvent(
-      {required this.name, required this.email, required this.roleId});
-}
+class LoadActiveProjects extends ManagerPageEvent {}
 
-class UpdateUserEvent extends UserEvent {
-  final String userId;
-  final String name;
-  final String email;
-  final String roleId;
+class LoadUserTasks extends ManagerPageEvent {}
 
-  UpdateUserEvent(
-      {required this.userId,
-      required this.name,
-      required this.email,
-      required this.roleId});
-}
-
-class DeleteUserEvent extends UserEvent {
-  final String userId;
-
-  DeleteUserEvent({required this.userId});
-}
+class LoadUserProjects extends ManagerPageEvent {}

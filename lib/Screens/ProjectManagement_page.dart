@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:task_assign_app/commons/Common_Functions.dart';
 
 import 'Views/check_role.dart';
 import '_save_Project.dart';
@@ -129,7 +130,8 @@ class ActiveProjectsScreen extends StatelessWidget {
                 ],
               ),
               FutureBuilder<String?>(
-                future: getManagerEmail(projectData["manager_id"] ?? ''),
+                future: Common_function.getManagerEmail(
+                    projectData["manager_id"] ?? ''),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Text(
@@ -239,22 +241,5 @@ class ActiveProjectsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<String?> getManagerEmail(String managerId) async {
-    try {
-      DocumentSnapshot managerDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(managerId)
-          .get();
-
-      if (managerDoc.exists) {
-        return managerDoc.get('email') as String?;
-      } else {
-        return 'No email found'; // Or handle as needed
-      }
-    } catch (e) {
-      return 'Unassigned Manager'; // Or handle as needed
-    }
   }
 }
