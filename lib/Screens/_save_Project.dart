@@ -113,6 +113,92 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
     return formatter.format(dateTime);
   }
 
+  // Future<void> _saveProject() async {
+  //   try {
+  //     final projectData = {
+  //       'name': nameController.text,
+  //       'status': selectedStatus,
+  //       'description': desController.text,
+  //       'deadline': selectedDeadline != null
+  //           ? Timestamp.fromDate(selectedDeadline!)
+  //           : null,
+  //       'manager_id': selectedManagerId,
+  //     };
+  //
+  //     if (UserRoleManager().isAdmin()) {}
+  //     if (widget.projectId == null) {
+  //       // Add new project
+  //       DocumentReference docRef = await FirebaseFirestore.instance
+  //           .collection('projects')
+  //           .add(projectData);
+  //
+  //       // Update the document with its ID
+  //       await docRef.update({
+  //         'project_id': docRef.id,
+  //       });
+  //     } else {
+  //       // Update existing project
+  //       await FirebaseFirestore.instance
+  //           .collection('projects')
+  //           .doc(widget.projectId)
+  //           .update(projectData)
+  //           .then((_) async {
+  //         if (selectedManagerId != null ||
+  //             selectedManagerId.toString().isNotEmpty) {
+  //           if (UserRoleManager().isManager()) {
+  //             final snapshot = await FirebaseFirestore.instance
+  //                 .collection('users')
+  //                 .doc(selectedManagerId)
+  //                 .get();
+  //             if (snapshot.exists) {
+  //               String Fcm = snapshot.get('FCM-token');
+  //               if (Fcm != null) {
+  //                 NotificationHandler.sendNotification(
+  //                     FCM_token: Fcm.toString(),
+  //                     title: "Project: ${nameController.text}",
+  //                     body: "Deadline: ${selectedDeadline.toString()}, ");
+  //               }
+  //             }
+  //           } else if (UserRoleManager().isAdmin()) {
+  //             final snapshot = await FirebaseFirestore.instance
+  //                 .collection('users')
+  //                 .doc(selectedManagerId)
+  //                 .get();
+  //             if (snapshot.exists) {
+  //               String Fcm = snapshot.get('FCM-token');
+  //               if (Fcm != null) {
+  //                 NotificationHandler.sendNotification(
+  //                     FCM_token: Fcm.toString(),
+  //                     title: "Project: ${nameController.text}",
+  //                     body:
+  //                         "Deadline: ${selectedDeadline.toString()}, Assigned By: ${FirebaseAuth.instance.currentUser?.email} ");
+  //               }
+  //             }
+  //           }
+  //         }
+  //       });
+  //     }
+  //
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(
+  //           widget.projectId == null
+  //               ? 'New project added successfully'
+  //               : 'Project updated successfully',
+  //         ),
+  //       ),
+  //     );
+  //
+  //     Navigator.of(context).pop(); // Close the page
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(
+  //             'Failed to ${widget.projectId == null ? 'add' : 'update'} project: $e'),
+  //       ),
+  //     );
+  //   }
+  // }
   Future<void> _saveProject() async {
     try {
       final projectData = {
@@ -125,7 +211,9 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
         'manager_id': selectedManagerId,
       };
 
-      if (UserRoleManager().isAdmin()) {}
+      final isAdmin = UserRoleManager().isAdmin();
+      final isManager = UserRoleManager().isManager();
+
       if (widget.projectId == null) {
         // Add new project
         DocumentReference docRef = await FirebaseFirestore.instance
@@ -133,50 +221,44 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
             .add(projectData);
 
         // Update the document with its ID
-        await docRef.update({
-          'project_id': docRef.id,
-        });
+        await docRef.update({'project_id': docRef.id}).then((_) {
+          if (selectedManagerId != null &&
+              selectedManagerId.toString().isNotEmpty) {
+            _sendNotificationIfNeeded(
+                selectedManagerId!, isManager, isAdmin, "Project Created by");
+          } else if (isManager) {
+            _sendNotificationToAllAdmins("Project Created by");
+          }
+        }).onError(
+          (error, stackTrace) {
+            print(
+                "Error On Update ${error.toString()}  Stack Is ${stackTrace.toString()}");
+          },
+        );
       } else {
         // Update existing project
         await FirebaseFirestore.instance
             .collection('projects')
             .doc(widget.projectId)
             .update(projectData)
-            .then((_) async {
-          if (selectedManagerId != null ||
+            .then((_) {
+          if (selectedManagerId != null &&
               selectedManagerId.toString().isNotEmpty) {
-            if (UserRoleManager().isManager()) {
-              final snapshot = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(selectedManagerId)
-                  .get();
-              if (snapshot.exists) {
-                String Fcm = snapshot.get('FCM-token');
-                if (Fcm != null) {
-                  NotificationHandler.sendNotification(
-                      FCM_token: Fcm.toString(),
-                      title: "Project: ${nameController.text}",
-                      body: "Deadline: ${selectedDeadline.toString()}, ");
-                }
-              }
-            } else if (UserRoleManager().isAdmin()) {
-              final snapshot = await FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(selectedManagerId)
-                  .get();
-              if (snapshot.exists) {
-                String Fcm = snapshot.get('FCM-token');
-                if (Fcm != null) {
-                  NotificationHandler.sendNotification(
-                      FCM_token: Fcm.toString(),
-                      title: "Project: ${nameController.text}",
-                      body:
-                          "Deadline: ${selectedDeadline.toString()}, Assigned By: ${FirebaseAuth.instance.currentUser?.email} ");
-                }
-              }
-            }
+            _sendNotificationIfNeeded(
+                selectedManagerId!, isManager, isAdmin, "Updated By");
+          } else if ((FirebaseAuth.instance.currentUser?.uid ==
+                  selectedManagerId) &&
+              isManager) {
+            _sendNotificationToAllAdmins("Updated By");
           }
-        });
+        }).onError(
+          (error, stackTrace) {
+            print(
+                "Error On Update ${error.toString()}  Stack Is ${stackTrace.toString()}");
+          },
+        );
+
+        // Handle notifications
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -197,6 +279,53 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
               'Failed to ${widget.projectId == null ? 'add' : 'update'} project: $e'),
         ),
       );
+      // Log error or perform other error handling
+    }
+  }
+
+  Future<void> _sendNotificationToAllAdmins(String sn) async {
+    final adminSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('role', isEqualTo: 'admin')
+        .get();
+
+    for (var doc in adminSnapshot.docs) {
+      final String? fcmToken = doc.get('FCM-token');
+      if (fcmToken != null) {
+        final title = "Project: ${nameController.text}";
+        final body =
+            "Deadline: ${selectedDeadline?.toString()}, $sn : ${FirebaseAuth.instance.currentUser?.email}";
+
+        await NotificationHandler.sendNotification(
+          FCM_token: fcmToken,
+          title: title,
+          body: body,
+        );
+      }
+    }
+  }
+
+  Future<void> _sendNotificationIfNeeded(
+      String managerId, bool isManager, bool isAdmin, String sn) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(managerId)
+        .get();
+
+    if (snapshot.exists) {
+      final String? fcmToken = snapshot.get('FCM-token');
+      if (fcmToken != null) {
+        final title = "Project: ${nameController.text}";
+        final body = isManager
+            ? "Deadline: ${selectedDeadline?.toString()}, $sn : ${FirebaseAuth.instance.currentUser?.email}"
+            : "Deadline: ${selectedDeadline?.toString()}, $sn : ${FirebaseAuth.instance.currentUser?.email}";
+
+        NotificationHandler.sendNotification(
+          FCM_token: fcmToken,
+          title: title,
+          body: body,
+        );
+      }
     }
   }
 
