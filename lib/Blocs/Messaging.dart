@@ -18,7 +18,6 @@ class MessagingBloc {
   // Top-level or static function for background message handling
   static Future<void> _firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
-    // Background message handling
     print("Handling a background message: ${message.messageId}");
   }
 

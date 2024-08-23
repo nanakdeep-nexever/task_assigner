@@ -65,8 +65,18 @@ void main() async {
 
   await NotificationHandler.init();
   FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+  FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
 
   runApp(const MyApp());
+}
+
+void _handleBackgroundMessage(RemoteMessage message) {
+  if (message.notification != null) {
+    _showNotification(
+      title: message.notification?.title,
+      body: message.notification?.body,
+    );
+  }
 }
 
 void _handleForegroundMessage(RemoteMessage message) {

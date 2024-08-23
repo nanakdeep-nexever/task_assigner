@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
+import 'package:task_assign_app/Screens/Views/check_role.dart';
 
-import '../Screens/Views/check_role.dart';
 import 'Rolestate.dart';
 
 class RoleCubit extends Cubit<RoleState> {
