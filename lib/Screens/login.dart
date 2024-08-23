@@ -25,7 +25,14 @@ class _LoginPageState extends State<LoginPage> {
         listener: (context, state) {
           if (state is AuthenticationAuthenticated) {
             Navigator.pushNamed(context, "/dashboard");
+            _emailController.clear();
+            _passwordController.clear();
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text(" Login Successfully")),
+            );
           } else if (state is AuthenticationError) {
+            _emailController.clear();
+            _passwordController.clear();
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text(" Invalid Credential")),
             );
@@ -48,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image.asset("assets/images/logoin.png"),
+                        Image.asset("assets/images/LoginLogo.png"),
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: _emailController,
@@ -152,8 +159,6 @@ class _LoginPageState extends State<LoginPage> {
                                       LoginEvent(
                                           email: email, password: password),
                                     );
-                                _emailController.clear();
-                                _passwordController.clear();
                               }
                             },
                             style: ElevatedButton.styleFrom(

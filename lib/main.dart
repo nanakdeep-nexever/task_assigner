@@ -29,6 +29,7 @@ import 'Screens/Views/Admin.dart';
 import 'Screens/Views/Devloper_view.dart';
 import 'Screens/Views/Manager_view.dart';
 import 'Screens/Views/complete_profile_screen.dart';
+import 'Screens/Views/edit_profile_screen.dart';
 import 'Screens/Views/splash_screen.dart';
 import 'Screens/Views/viewer_view.dart';
 import 'Screens/login.dart';
@@ -217,7 +218,9 @@ class MyApp extends StatelessWidget {
             case '/forgot_password':
               return getRoute(settings, (_) => const ResetPasswordScreen());
             case '/completeProfile':
-              return getRoute(settings, (_) => CompleteProfileScreen());
+              return getRoute(settings, (_) => const CompleteProfileScreen());
+            case '/editProfile':
+              return getRoute(settings, (_) => const EditProfileScreen());
             case '/profile':
               return getRoute(settings, (_) {
                 Map<String, dynamic>? data =

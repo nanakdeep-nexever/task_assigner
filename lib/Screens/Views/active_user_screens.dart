@@ -10,12 +10,6 @@ class ActiveUsersScreen extends StatelessWidget {
   ActiveUsersScreen({super.key, required this.activeUsersStream});
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  void _editUser(BuildContext context, String uid) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Edit user $uid')),
-    );
-  }
-
   void _confirmDeleteUser(BuildContext context, String uid) {
     showDialog(
       context: context,
@@ -70,7 +64,7 @@ class ActiveUsersScreen extends StatelessWidget {
     try {
       await FirebaseFirestore.instance.collection('users').doc(uid).delete();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User $uid deleted')),
+        const SnackBar(content: Text('User deleted')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -361,6 +355,8 @@ class ActiveUsersScreen extends StatelessWidget {
               final uid = user.id;
               final email = user['email'] ?? 'No Email';
               final role = user["role"];
+              final img = user["profileImageUrl"] ?? "";
+              final name = user["firstName"] ?? "Unknown";
 
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -379,13 +375,24 @@ class ActiveUsersScreen extends StatelessWidget {
                   ),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      child: Text("${index + 1}"),
+                      backgroundImage: NetworkImage(img),
+                      backgroundColor: Colors.grey,
+                      child: Text(""),
                     ),
-                    title: Text(
-                      "Email: $email",
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, color: Colors.black),
+                    title: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Name: ${name ?? "unknown"}",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600, color: Colors.black),
+                        ),
+                        Text(
+                          "Email: $email",
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600, color: Colors.black),
+                        ),
+                      ],
                     ),
                     subtitle: Text(
                       "Role: $role",
@@ -396,7 +403,7 @@ class ActiveUsersScreen extends StatelessWidget {
                         ? PopupMenuButton<String>(
                             onSelected: (value) {
                               if (value == 'edit') {
-                                _editUser(context, uid);
+                                Navigator.pushNamed(context, "/editProfile");
                               } else if (value == 'delete') {
                                 _confirmDeleteUser(context, uid);
                               } else if (value == 'role') {

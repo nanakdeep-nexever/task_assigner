@@ -69,7 +69,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           emit(UserProfileLoaded(
             firstName: data['firstName'] ?? '',
             lastName: data['lastName'] ?? '',
-            email: data['email'] ?? '',
+            phoneNumber: data['phoneNumber'] ?? '',
             profileImageUrl: data['profileImageUrl'] ?? '',
           ));
         } else {

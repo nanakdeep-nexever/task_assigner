@@ -24,13 +24,13 @@ class _DashboardPageState extends State<DashboardPage> {
         },
         builder: (context, state) {
           if (state.role == 'admin') {
-            return AdminPage();
+            return const AdminPage();
           } else if (state.role == 'manager') {
-            return ManagerPage();
+            return const ManagerPage();
           } else if (state.role == 'developer') {
-            return DeveloperPage();
+            return const DeveloperPage();
           } else {
-            return ViewerPage();
+            return const ViewerPage();
           }
         },
       ),

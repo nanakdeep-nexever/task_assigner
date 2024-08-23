@@ -53,8 +53,10 @@ class _RegisterPageState extends State<RegisterPage> {
             }*/
           } else if (state is AuthenticationError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Already Registered")),
+              const SnackBar(content: Text("Already Registered")),
             );
+            _emailController.clear();
+            _passwordController.clear();
           }
         },
         builder: (context, state) {
@@ -69,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Image.asset("assets/images/regis.png"),
+                        Image.asset("assets/images/newRegisLogo.png"),
                         const SizedBox(height: 16.0),
                         TextFormField(
                           controller: _emailController,
@@ -104,7 +106,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           controller: _passwordController,
                           decoration: InputDecoration(
                             labelText: 'Password',
-                            labelStyle: TextStyle(color: Colors.black),
+                            labelStyle: const TextStyle(color: Colors.black),
                             border: const OutlineInputBorder(),
                             focusedBorder: const OutlineInputBorder(
                               borderSide:
@@ -115,7 +117,7 @@ class _RegisterPageState extends State<RegisterPage> {
                                   BorderSide(color: Colors.grey, width: 1.0),
                             ),
                             contentPadding:
-                                EdgeInsets.symmetric(horizontal: 16.0),
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                             suffixIcon: IconButton(
                               onPressed: () {
                                 setState(() {
@@ -156,8 +158,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             },
                             style: ElevatedButton.styleFrom(
                               foregroundColor: Colors.white,
-                              backgroundColor:
-                                  Colors.blue, // Button background color
+                              backgroundColor: Colors.blue,
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 32.0, vertical: 16.0),
                               shape: RoundedRectangleBorder(

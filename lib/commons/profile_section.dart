@@ -276,7 +276,7 @@ class ProfileSection extends StatelessWidget {
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                onConfirm(); // Execute the delete action
+                onConfirm();
               },
             ),
           ],

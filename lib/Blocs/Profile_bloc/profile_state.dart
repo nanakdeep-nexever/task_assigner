@@ -23,13 +23,13 @@ class ProfileImagePicked extends ProfileState {
 class UserProfileLoaded extends ProfileState {
   final String firstName;
   final String lastName;
-  final String email;
+  final String phoneNumber;
   final String profileImageUrl;
 
   UserProfileLoaded({
     required this.firstName,
     required this.lastName,
-    required this.email,
+    required this.phoneNumber,
     required this.profileImageUrl,
   });
 }

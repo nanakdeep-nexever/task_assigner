@@ -42,17 +42,17 @@ class ActiveTasksScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final task = tasks[index];
               return TaskCard(
-                task: task,
-                onEdit: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => TaskPage(task: task),
-                    ),
-                  );
-                },
-                onDelete: () => _deleteTask(context, task.id),
-              );
+                  task: task,
+                  onEdit: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TaskPage(task: task),
+                      ),
+                    );
+                  },
+                  onDelete: () => _deleteTask(context, task.id),
+                  index: index);
             },
           );
         },
@@ -136,12 +136,13 @@ class TaskCard extends StatelessWidget {
   final QueryDocumentSnapshot task;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
-
+  final int index;
   const TaskCard({
     super.key,
     required this.task,
     required this.onEdit,
     required this.onDelete,
+    required this.index,
   });
 
   @override
@@ -174,7 +175,7 @@ class TaskCard extends StatelessWidget {
           leading: CircleAvatar(
             backgroundColor: Colors.green,
             child: Text(
-              "${task.reference.id}",
+              "${index + 1}",
               style: const TextStyle(color: Colors.white),
             ),
           ),
@@ -218,7 +219,7 @@ class TaskCard extends StatelessWidget {
                   ),
                   if (isDeadlinePassed &&
                       !['Completed', 'Cancelled'].contains(status))
-                    Icon(
+                    const Icon(
                       Icons.notifications_active,
                       color: Colors.red,
                     ),
