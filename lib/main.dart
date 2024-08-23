@@ -1,11 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
+import 'package:task_assign_app/Screens/Views/edit_profile_screen.dart';
 import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 
 import 'Blocs/AUTHentication/authentication_bloc.dart';
@@ -28,8 +26,6 @@ import 'Screens/Views/Admin.dart';
 import 'Screens/Views/Devloper_view.dart';
 import 'Screens/Views/Manager_view.dart';
 import 'Screens/Views/complete_profile_screen.dart';
-import 'Screens/Views/edit_profile_screen.dart';
-import 'Screens/Views/splash_screen.dart';
 import 'Screens/Views/reset_password_screen.dart';
 import 'Screens/Views/viewer_view.dart';
 import 'Screens/login.dart';
@@ -68,7 +64,7 @@ class MyApp extends StatelessWidget {
   final MessagingBloc messagingBloc;
   final NotificationHandler notificationHandler;
 
-  MyApp({required this.messagingBloc, required this.notificationHandler});
+  const MyApp({required this.messagingBloc, required this.notificationHandler});
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -86,71 +82,6 @@ class MyApp extends StatelessWidget {
         title: 'TaskAssignPro',
         initialRoute: '/splash',
         onGenerateRoute: _generateRoute,
-        onGenerateRoute: (settings) {
-          switch (settings.name) {
-            case '/':
-              return getRoute(settings, (_) => const LoginPage());
-            case '/splash':
-              return getRoute(settings, (_) => const SplashScreen());
-            case '/register':
-              return getRoute(settings, (_) => const RegisterPage());
-            case '/admin':
-              return getRoute(settings, (_) => const AdminPage());
-            case '/manager':
-              return getRoute(settings, (_) => const ManagerPage());
-            case '/developer':
-              return getRoute(settings, (_) => const DeveloperPage());
-            case '/viewer':
-              return getRoute(settings, (_) => const ViewerPage());
-            case '/dashboard':
-              return getRoute(settings, (_) => const DashboardPage());
-            case '/projects':
-              return getRoute(settings, (_) => const ProjectManagementPage());
-            case '/tasks':
-              return getRoute(settings, (_) => const TaskManagementPage());
-            case '/users':
-              return getRoute(settings, (_) => const UserManagementPage());
-            case '/roles':
-              return getRoute(settings, (_) => const RoleManagementPage());
-            case '/notifications':
-              return getRoute(settings, (_) => const NotificationPage());
-            case '/forgot_password':
-              return getRoute(settings, (_) => const ResetPasswordScreen());
-            case '/completeProfile':
-              return getRoute(settings, (_) => const CompleteProfileScreen());
-            case '/editProfile':
-              return getRoute(settings, (_) => const EditProfileScreen());
-            case '/profile':
-              return getRoute(settings, (_) {
-                Map<String, dynamic>? data =
-                    settings.arguments as Map<String, dynamic>?;
-                return ProfileSection(
-                  heading: data?['heading'] ?? "",
-                );
-              });
-            // Ensure that 'heading' is correctly passed
-            default:
-              return getRoute(settings, (_) => const SplashScreen());
-          }
-        },
-
-        // routes: {
-        //   '/': (context) => const LoginPage(),
-        //   '/splash': (context) => const SplashScreen(),
-        //   '/register': (context) => const RegisterPage(),
-        //   '/admin': (context) => const AdminPage(),
-        //   '/manager': (context) => const ManagerPage(),
-        //   '/developer': (context) => const DeveloperPage(),
-        //   '/viewer': (context) => const ViewerPage(),
-        //   '/dashboard': (context) => const DashboardPage(),
-        //   '/projects': (context) => const ProjectManagementPage(),
-        //   '/tasks': (context) => const TaskManagementPage(),
-        //   '/users': (context) => const UserManagementPage(),
-        //   '/roles': (context) => const RoleManagementPage(),
-        //   '/notifications': (context) => const NotificationPage(),
-        //   '/forgot_password': (context) => const ResetPasswordScreen(),
-        //   '/profile': (context) => const ProfileSection(heading: heading),
-        // },
       ),
     );
   }
@@ -171,7 +102,8 @@ class MyApp extends StatelessWidget {
       '/roles': (context) => const RoleManagementPage(),
       '/notifications': (context) => const NotificationPage(),
       '/forgot_password': (context) => const ResetPasswordScreen(),
-      '/completeProfile': (context) => CompleteProfileScreen(),
+      '/completeProfile': (context) => const CompleteProfileScreen(),
+      "/editProfile": (context) => const EditProfileScreen(),
       '/profile': (context) {
         final data = settings.arguments as Map<String, dynamic>?;
         return ProfileSection(heading: data?['heading'] ?? "");
