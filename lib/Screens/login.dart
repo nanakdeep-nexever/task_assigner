@@ -24,31 +24,7 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocConsumer<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
           if (state is AuthenticationAuthenticated) {
-            if (state.userId == 'admin') {
-              Navigator.pushReplacementNamed(
-                context,
-                '/admin',
-                arguments: state.userId.toString(),
-              );
-            } else if (state.userId == 'manager') {
-              Navigator.pushReplacementNamed(
-                context,
-                '/manager',
-                arguments: state.userId.toString(),
-              );
-            } else if (state.userId == 'developer') {
-              Navigator.pushReplacementNamed(
-                context,
-                '/developer',
-                arguments: state.userId.toString(),
-              );
-            } else if (state.userId == 'viewer') {
-              Navigator.pushReplacementNamed(
-                context,
-                '/viewer',
-                arguments: state.userId.toString(),
-              );
-            }
+            Navigator.pushNamed(context, "/dashboard");
           } else if (state is AuthenticationError) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text(" Invalid Credential")),

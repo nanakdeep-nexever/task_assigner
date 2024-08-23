@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
+
+import 'Notification_Handle/Notification_Handle.dart';
 
 class ProjectFormPage extends StatefulWidget {
   final String? projectId;
@@ -18,6 +21,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   String? selectedStatus;
   DateTime? selectedDeadline;
   String? selectedManagerId;
+  String FCmToken = '';
   List<Map<String, String>> managers = [];
 
   @override
@@ -68,36 +72,6 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       });
     } catch (e) {
       print('Error fetching managers: $e');
-    }
-  }
-
-  Future<String> Getfcm(String selectedManagerId) async {
-    Future<String?> fetchFcmToken(String selectedManagerId) async {
-      try {
-        print("data $selectedManagerId");
-        DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(selectedManagerId)
-            .get();
-
-        if (docSnapshot.exists) {
-          return docSnapshot.get("FCM-token") as String?;
-        } else {
-          print("Document does not exist");
-          return null;
-        }
-      } catch (e) {
-        print("Error fetching FCM token: $e");
-        return null;
-      }
-    }
-
-    String? token = await fetchFcmToken(selectedManagerId);
-    if (token != null) {
-      return token;
-    } else {
-      print("Failed to retrieve FCM token.");
-      return "";
     }
   }
 
@@ -167,7 +141,42 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
         await FirebaseFirestore.instance
             .collection('projects')
             .doc(widget.projectId)
-            .update(projectData);
+            .update(projectData)
+            .then((_) async {
+          if (selectedManagerId != null ||
+              selectedManagerId.toString().isNotEmpty) {
+            if (UserRoleManager().isManager()) {
+              final snapshot = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(selectedManagerId)
+                  .get();
+              if (snapshot.exists) {
+                String Fcm = snapshot.get('FCM-token');
+                if (Fcm != null) {
+                  NotificationHandler.sendNotification(
+                      FCM_token: Fcm.toString(),
+                      title: "Project: ${nameController.text}",
+                      body: "Deadline: ${selectedDeadline.toString()}, ");
+                }
+              }
+            } else if (UserRoleManager().isAdmin()) {
+              final snapshot = await FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(selectedManagerId)
+                  .get();
+              if (snapshot.exists) {
+                String Fcm = snapshot.get('FCM-token');
+                if (Fcm != null) {
+                  NotificationHandler.sendNotification(
+                      FCM_token: Fcm.toString(),
+                      title: "Project: ${nameController.text}",
+                      body:
+                          "Deadline: ${selectedDeadline.toString()}, Assigned By: ${FirebaseAuth.instance.currentUser?.email} ");
+                }
+              }
+            }
+          }
+        });
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

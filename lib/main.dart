@@ -12,6 +12,7 @@ import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
 import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
 import 'package:task_assign_app/Blocs/Profile_bloc/profile_bloc.dart';
 import 'package:task_assign_app/Blocs/Project_Management_BLoC/project_manage_bloc.dart';
+import 'package:task_assign_app/Blocs/Rolecube.dart';
 import 'package:task_assign_app/Blocs/Task_Management_BLoC/task_bloc.dart';
 import 'package:task_assign_app/Screens/Views/reset_password_screen.dart';
 
@@ -68,8 +69,18 @@ void main() async {
 
   await NotificationHandler.init();
   FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+  FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
 
   runApp(const MyApp());
+}
+
+void _handleBackgroundMessage(RemoteMessage message) {
+  if (message.notification != null) {
+    _showNotification(
+      title: message.notification?.title,
+      body: message.notification?.body,
+    );
+  }
 }
 
 void _handleForegroundMessage(RemoteMessage message) {
@@ -166,6 +177,9 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(
           create: (context) => ProfileBloc(),
+        ),
+        BlocProvider(
+          create: (context) => RoleCubit(),
         ),
       ],
       child: MaterialApp(
