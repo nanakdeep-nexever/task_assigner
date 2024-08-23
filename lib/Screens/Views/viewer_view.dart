@@ -8,8 +8,8 @@ import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import '../../commons/function.dart';
-import 'active_project_screen.dart';
-import 'active_task_screen.dart';
+import '../ProjectManagement_page.dart';
+import '../Taskmanagement.dart';
 
 class ViewerPage extends StatefulWidget {
   const ViewerPage({super.key});
@@ -171,19 +171,10 @@ class ViewerPageState extends State<ViewerPage> {
                         ];
 
                         final screens = [
-                          ActiveTasksScreen(
-                            activeTasksStream: _activeTasksStream,
-                          ),
-                          ActiveProjectsScreen(
-                              activeProjectsStream: _activeProjectsStream),
+                          ActiveTasksScreen(),
+                          ActiveProjectsScreen(),
                         ];
 
-                        /*  final screens = [
-                          const ActiveUserPage(),
-                          const ActiveTasksPage(),
-                          const ActiveProjectsPage()
-                        ];
-*/
                         return Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.0),
@@ -253,10 +244,11 @@ class ViewerPageState extends State<ViewerPage> {
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ActiveTasksScreen(
-                                      activeTasksStream: _activeTasksStream)));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ActiveTasksScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           "See all",

@@ -7,8 +7,8 @@ import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import '../../commons/function.dart';
-import 'active_project_screen.dart';
-import 'active_task_screen.dart';
+import '../ProjectManagement_page.dart';
+import '../Taskmanagement.dart';
 
 class ManagerPage extends StatefulWidget {
   const ManagerPage({super.key});
@@ -169,11 +169,8 @@ class ManagerPageState extends State<ManagerPage> {
                           _activeProjectsStream,
                         ];
                         final screens = [
-                          ActiveTasksScreen(
-                            activeTasksStream: _activeTasksStream,
-                          ),
-                          ActiveProjectsScreen(
-                              activeProjectsStream: _activeProjectsStream),
+                          ActiveTasksScreen(),
+                          ActiveProjectsScreen(),
                         ];
 
                         /*  final screens = [
@@ -262,10 +259,11 @@ class ManagerPageState extends State<ManagerPage> {
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ActiveTasksScreen(
-                                      activeTasksStream: _activeTasksStream)));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ActiveTasksScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           "See all",

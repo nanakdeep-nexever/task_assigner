@@ -3,20 +3,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
-import 'package:task_assign_app/Blocs/AUTHentication/authentication_bloc.dart';
-import 'package:task_assign_app/Blocs/Management_bloc/management_bloc.dart';
-import 'package:task_assign_app/Blocs/Notification_bloc/notification_bloc.dart';
-import 'package:task_assign_app/Blocs/Profile_bloc/profile_bloc.dart';
-import 'package:task_assign_app/Blocs/Project_Management_BLoC/project_manage_bloc.dart';
-import 'package:task_assign_app/Blocs/Rolecube.dart';
-import 'package:task_assign_app/Blocs/Task_Management_BLoC/task_bloc.dart';
-import 'package:task_assign_app/Screens/Views/reset_password_screen.dart';
+import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 
+import 'Blocs/AUTHentication/authentication_bloc.dart';
+import 'Blocs/Management_bloc/management_bloc.dart';
 import 'Blocs/Messaging.dart';
+import 'Blocs/Notification_bloc/notification_bloc.dart';
+import 'Blocs/Profile_bloc/profile_bloc.dart';
+import 'Blocs/Project_Management_BLoC/project_manage_bloc.dart';
+import 'Blocs/Rolecube.dart';
+import 'Blocs/Task_Management_BLoC/task_bloc.dart';
 import 'Screens/Dashboard.dart';
 import 'Screens/Notification_Handle/Notification_Handle.dart';
 import 'Screens/Notification_page.dart';
@@ -31,6 +30,7 @@ import 'Screens/Views/Manager_view.dart';
 import 'Screens/Views/complete_profile_screen.dart';
 import 'Screens/Views/edit_profile_screen.dart';
 import 'Screens/Views/splash_screen.dart';
+import 'Screens/Views/reset_password_screen.dart';
 import 'Screens/Views/viewer_view.dart';
 import 'Screens/login.dart';
 import 'commons/profile_section.dart';
@@ -40,153 +40,52 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
 final locator = GetIt.instance;
-NotificationHandler notificatioHendler = NotificationHandler();
 
 void setupLocator() {
-  locator.registerLazySingleton(() => MessagingBloc());
+  locator.registerLazySingleton(
+      () => MessagingBloc(flutterLocalNotificationsPlugin));
+  locator.registerLazySingleton(
+      () => NotificationHandler(flutterLocalNotificationsPlugin));
 }
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized()
-      .addObserver(CustomWidgetsBindingObserver());
-  SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-  ]);
-
+  WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  const AndroidInitializationSettings initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-
-  const InitializationSettings initializationSettings = InitializationSettings(
-    android: initializationSettingsAndroid,
-    iOS: null,
-  );
-
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
   setupLocator();
 
+  // Initialize NotificationHandler
   await NotificationHandler.init();
-  FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
-  FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundMessage);
 
-  runApp(const MyApp());
-}
-
-void _handleBackgroundMessage(RemoteMessage message) {
-  if (message.notification != null) {
-    _showNotification(
-      title: message.notification?.title,
-      body: message.notification?.body,
-    );
-  }
-}
-
-void _handleForegroundMessage(RemoteMessage message) {
-  if (message.notification != null) {
-    _showNotification(
-      title: message.notification?.title,
-      body: message.notification?.body,
-    );
-  }
-}
-
-Future<void> _showNotification({String? title, String? body}) async {
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
-    'your_channel_id',
-    'your_channel_name',
-    channelDescription: 'your_channel_description',
-    importance: Importance.max,
-    priority: Priority.high,
-    ticker: 'ticker',
-  );
-
-  const NotificationDetails platformChannelSpecifics = NotificationDetails(
-    android: androidPlatformChannelSpecifics,
-    iOS: null, // iOS settings can be added here
-  );
-
-  await flutterLocalNotificationsPlugin.show(
-    0,
-    title,
-    body,
-    platformChannelSpecifics,
-    payload: 'item x',
-  );
-}
-
-class CustomWidgetsBindingObserver extends WidgetsBindingObserver {
-  void _setOnlineStatus(bool status) async {
-    try {
-      if (FirebaseAuth.instance.currentUser?.uid != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser?.uid)
-            .update({
-          'status_online': status,
-        });
-      }
-    } catch (e) {
-      if (AppConfig.contextExits) {
-        ScaffoldMessenger.of(AppConfig.context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-          ),
-        );
-      }
-    }
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    _setOnlineStatus(state == AppLifecycleState.resumed);
-
-    super.didChangeAppLifecycleState(state);
-  }
-}
-
-class AppConfig {
-  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  static BuildContext context = navigatorKey.currentState!.context;
-  static bool contextExits = navigatorKey.currentState?.context != null;
+  runApp(MyApp(
+    messagingBloc: locator<MessagingBloc>(),
+    notificationHandler: locator<NotificationHandler>(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final MessagingBloc messagingBloc;
+  final NotificationHandler notificationHandler;
 
+  MyApp({required this.messagingBloc, required this.notificationHandler});
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => AuthenticationBloc(),
-        ),
-        BlocProvider(
-          create: (context) => UserBloc(),
-        ),
-        BlocProvider(
-          create: (context) => NotificationBloc(),
-        ),
-        BlocProvider(
-          create: (context) => ProjectBloc(),
-        ),
-        BlocProvider(
-          create: (context) => TaskBloc(),
-        ),
-        BlocProvider(
-          create: (context) => ProfileBloc(),
-        ),
-        BlocProvider(
-          create: (context) => RoleCubit(),
-        ),
+        BlocProvider(create: (context) => AuthenticationBloc()),
+        BlocProvider(create: (context) => UserBloc()),
+        BlocProvider(create: (context) => NotificationBloc()),
+        BlocProvider(create: (context) => ProjectBloc()),
+        BlocProvider(create: (context) => TaskBloc()),
+        BlocProvider(create: (context) => ProfileBloc()),
+        BlocProvider(create: (context) => RoleCubit()),
       ],
       child: MaterialApp(
         navigatorKey: AppConfig.navigatorKey,
         title: 'TaskAssignPro',
         initialRoute: '/splash',
+        onGenerateRoute: _generateRoute,
         onGenerateRoute: (settings) {
           switch (settings.name) {
             case '/':
@@ -256,10 +155,37 @@ class MyApp extends StatelessWidget {
     );
   }
 
-  Route<dynamic> getRoute(RouteSettings settings, WidgetBuilder builder) {
+  Route<dynamic> _generateRoute(RouteSettings settings) {
+    final routes = {
+      '/': (context) => const LoginPage(),
+      '/splash': (context) => const SplashScreen(),
+      '/register': (context) => const RegisterPage(),
+      '/admin': (context) => const AdminPage(),
+      '/manager': (context) => const ManagerPage(),
+      '/developer': (context) => const DeveloperPage(),
+      '/viewer': (context) => const ViewerPage(),
+      '/dashboard': (context) => const DashboardPage(),
+      '/projects': (context) => ActiveProjectsScreen(),
+      '/tasks': (context) => ActiveTasksScreen(),
+      '/users': (context) => const UserManagementPage(),
+      '/roles': (context) => const RoleManagementPage(),
+      '/notifications': (context) => const NotificationPage(),
+      '/forgot_password': (context) => const ResetPasswordScreen(),
+      '/completeProfile': (context) => CompleteProfileScreen(),
+      '/profile': (context) {
+        final data = settings.arguments as Map<String, dynamic>?;
+        return ProfileSection(heading: data?['heading'] ?? "");
+      },
+    };
+
     return MaterialPageRoute(
-      builder: builder,
+      builder: routes[settings.name] ?? (context) => const SplashScreen(),
       settings: settings,
     );
   }
+}
+
+class AppConfig {
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
 }
