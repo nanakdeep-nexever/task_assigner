@@ -7,7 +7,7 @@ import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import '../../commons/function.dart';
-import 'active_task_screen.dart';
+import '../Taskmanagement.dart';
 
 class DeveloperPage extends StatefulWidget {
   const DeveloperPage({super.key});
@@ -199,10 +199,11 @@ class DeveloperPageState extends State<DeveloperPage> {
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ActiveTasksScreen(
-                                      activeTasksStream: _activeTasksStream)));
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ActiveTasksScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           "See all",

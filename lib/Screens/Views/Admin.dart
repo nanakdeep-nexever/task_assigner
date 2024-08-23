@@ -7,8 +7,8 @@ import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import '../../commons/function.dart';
-import 'active_project_screen.dart';
-import 'active_task_screen.dart';
+import '../ProjectManagement_page.dart';
+import '../Taskmanagement.dart';
 import 'active_user_screens.dart';
 
 class AdminPage extends StatefulWidget {
@@ -177,12 +177,9 @@ class AdminPageState extends State<AdminPage> {
                         ];
 
                         final screens = [
-                          ActiveUsersScreen(activeUsersStream: _usersStream),
-                          ActiveTasksScreen(
-                            activeTasksStream: _activeTasksStream,
-                          ),
-                          ActiveProjectsScreen(
-                              activeProjectsStream: _activeProjectsStream),
+                          ActiveUsersScreen(),
+                          ActiveTasksScreen(),
+                          ActiveProjectsScreen(),
                         ];
 
                         /*  final screens = [
@@ -273,16 +270,14 @@ class AdminPageState extends State<AdminPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ActiveUsersScreen(
-                                      activeUsersStream: _usersStream)));
+                                  builder: (context) => ActiveUsersScreen()));
                         },
                         child: GestureDetector(
                           onTap: () {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => ActiveUsersScreen(
-                                        activeUsersStream: _usersStream)));
+                                    builder: (context) => ActiveUsersScreen()));
                           },
                           child: const Text(
                             "See all",
@@ -384,8 +379,7 @@ class AdminPageState extends State<AdminPage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ActiveTasksScreen(
-                                      activeTasksStream: _activeTasksStream)));
+                                  builder: (context) => ActiveTasksScreen()));
                         },
                         child: const Text(
                           "See all",

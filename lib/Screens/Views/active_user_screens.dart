@@ -5,9 +5,7 @@ import 'package:task_assign_app/Screens/Notification_Handle/Notification_Handle.
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 
 class ActiveUsersScreen extends StatelessWidget {
-  final Stream<QuerySnapshot> activeUsersStream;
-
-  ActiveUsersScreen({super.key, required this.activeUsersStream});
+  ActiveUsersScreen({super.key});
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   void _editUser(BuildContext context, String uid) {
