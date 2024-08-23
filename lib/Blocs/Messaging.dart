@@ -68,7 +68,6 @@ class MessagingBloc {
 
   static Future<void> _firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
-    // You can handle background notifications here if needed
     print("Handling a background message: ${message.messageId}");
   }
 

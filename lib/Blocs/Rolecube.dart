@@ -5,7 +5,7 @@ import 'package:task_assign_app/Screens/Views/check_role.dart';
 class RoleCubit extends Cubit<RoleState> {
   final UserRoleManager _userRoleManager = UserRoleManager();
 
-  RoleCubit() : super(RoleState(null)) {
+  RoleCubit() : super(const RoleState(null)) {
     _userRoleManager.init();
     _userRoleManager.roleStream.listen((role) {
       emit(RoleState(role));
@@ -22,7 +22,7 @@ class RoleCubit extends Cubit<RoleState> {
 class RoleState extends Equatable {
   final String? role;
 
-  RoleState(this.role);
+  const RoleState(this.role);
 
   @override
   List<Object?> get props => [role];

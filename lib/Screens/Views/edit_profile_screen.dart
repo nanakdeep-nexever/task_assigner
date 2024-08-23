@@ -13,6 +13,7 @@ class EditUserScreen extends StatefulWidget {
   final String initialProfileImageUrl;
 
   const EditUserScreen({
+    super.key,
     required this.uid,
     required this.initialFirstName,
     required this.initialLastName,
@@ -72,7 +73,7 @@ class _EditUserScreenState extends State<EditUserScreen> {
   Future<void> _saveUserData() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
-        _isUpdating = true; // Show loader
+        _isUpdating = true;
       });
 
       try {
@@ -153,13 +154,13 @@ class _EditUserScreenState extends State<EditUserScreen> {
                   filled: true,
                   fillColor: Colors.blue.shade50,
                   labelText: 'First Name',
-                  prefixIcon: Icon(Icons.person),
+                  prefixIcon: const Icon(Icons.person),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2),
                   ),
                 ),
                 validator: (value) =>

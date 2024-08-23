@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CreateUserPage extends StatefulWidget {
+  const CreateUserPage({super.key});
+
   @override
   _CreateUserPageState createState() => _CreateUserPageState();
 }
@@ -52,7 +54,7 @@ class _CreateUserPageState extends State<CreateUserPage> {
   Future<void> _createUser() async {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
-        _isLoading = true; // Show loader when the process starts
+        _isLoading = true;
       });
 
       try {
@@ -91,7 +93,7 @@ class _CreateUserPageState extends State<CreateUserPage> {
         );
       } finally {
         setState(() {
-          _isLoading = false; // Hide loader when the process ends
+          _isLoading = false;
         });
       }
     } else {

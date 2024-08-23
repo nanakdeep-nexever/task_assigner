@@ -250,10 +250,10 @@ class ActiveProjectsScreen extends StatelessWidget {
       if (managerDoc.exists) {
         return managerDoc.get('email') as String?;
       } else {
-        return 'No email found'; // Or handle as needed
+        return 'No email found';
       }
     } catch (e) {
-      return 'Unassigned Manager'; // Or handle as needed
+      return 'Unassigned Manager';
     }
   }
 }

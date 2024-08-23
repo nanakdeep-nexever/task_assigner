@@ -215,12 +215,10 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
       final isManager = UserRoleManager().isManager();
 
       if (widget.projectId == null) {
-        // Add new project
         DocumentReference docRef = await FirebaseFirestore.instance
             .collection('projects')
             .add(projectData);
 
-        // Update the document with its ID
         await docRef.update({'project_id': docRef.id}).then((_) {
           if (selectedManagerId != null &&
               selectedManagerId.toString().isNotEmpty) {
@@ -236,7 +234,6 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
           },
         );
       } else {
-        // Update existing project
         await FirebaseFirestore.instance
             .collection('projects')
             .doc(widget.projectId)
