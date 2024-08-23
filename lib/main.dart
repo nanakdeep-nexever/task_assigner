@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
-import 'package:task_assign_app/Screens/Views/edit_profile_screen.dart';
 import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 
 import 'Blocs/AUTHentication/authentication_bloc.dart';
@@ -103,7 +102,6 @@ class MyApp extends StatelessWidget {
       '/notifications': (context) => const NotificationPage(),
       '/forgot_password': (context) => const ResetPasswordScreen(),
       '/completeProfile': (context) => const CompleteProfileScreen(),
-      "/editProfile": (context) => const EditProfileScreen(),
       '/profile': (context) {
         final data = settings.arguments as Map<String, dynamic>?;
         return ProfileSection(heading: data?['heading'] ?? "");

@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:task_assign_app/Screens/Notification_Handle/Notification_Handle.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
+import 'package:task_assign_app/Screens/Views/create%20_user.dart';
+
+import 'edit_profile_screen.dart';
 
 class ActiveUsersScreen extends StatelessWidget {
   ActiveUsersScreen({super.key});
@@ -355,6 +358,8 @@ class ActiveUsersScreen extends StatelessWidget {
               final role = user["role"];
               final img = user["profileImageUrl"] ?? "";
               final name = user["firstName"] ?? "Unknown";
+              final lastName = user["lastName"] ?? "Unknown";
+              final phone = user["phoneNumber"] ?? "Unknown";
 
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -401,7 +406,16 @@ class ActiveUsersScreen extends StatelessWidget {
                         ? PopupMenuButton<String>(
                             onSelected: (value) {
                               if (value == 'edit') {
-                                Navigator.pushNamed(context, "/editProfile");
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => EditUserScreen(
+                                              uid: uid,
+                                              initialFirstName: name,
+                                              initialLastName: lastName,
+                                              initialPhoneNumber: phone,
+                                              initialProfileImageUrl: img,
+                                            )));
                               } else if (value == 'delete') {
                                 _confirmDeleteUser(context, uid);
                               } else if (value == 'role') {
@@ -435,7 +449,10 @@ class ActiveUsersScreen extends StatelessWidget {
       floatingActionButton: isAdmin()
           ? FloatingActionButton(
               backgroundColor: Colors.blue,
-              onPressed: () => _showCreateUserDialog(context),
+              onPressed: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => CreateUserPage()));
+              },
               child: const Icon(
                 Icons.add,
                 size: 30,

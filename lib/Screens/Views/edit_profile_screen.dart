@@ -1,189 +1,238 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:task_assign_app/Screens/Views/check_role.dart';
+import 'package:image_picker/image_picker.dart';
 
-import '../../Blocs/Profile_bloc/profile_bloc.dart';
-import '../../Blocs/Profile_bloc/profile_event.dart';
-import '../../Blocs/Profile_bloc/profile_state.dart';
+class EditUserScreen extends StatefulWidget {
+  final String uid;
+  final String initialFirstName;
+  final String initialLastName;
+  final String initialPhoneNumber;
+  final String initialProfileImageUrl;
 
-class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
+  const EditUserScreen({
+    required this.uid,
+    required this.initialFirstName,
+    required this.initialLastName,
+    required this.initialPhoneNumber,
+    required this.initialProfileImageUrl,
+  });
 
   @override
-  _EditProfileScreenState createState() => _EditProfileScreenState();
+  _EditUserScreenState createState() => _EditUserScreenState();
 }
 
-class _EditProfileScreenState extends State<EditProfileScreen> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
+class _EditUserScreenState extends State<EditUserScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _phoneNumberController = TextEditingController();
+  String? _profileImageUrl;
+  XFile? _imageFile;
+  final _picker = ImagePicker();
+  bool _isUpdating = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<ProfileBloc>().add(FetchUserProfile());
+    _firstNameController.text = widget.initialFirstName;
+    _lastNameController.text = widget.initialLastName;
+    _phoneNumberController.text = widget.initialPhoneNumber;
+    _profileImageUrl = widget.initialProfileImageUrl;
   }
 
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _phoneNumberController.dispose();
-    super.dispose();
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = pickedFile;
+      });
+    }
+  }
+
+  Future<String?> _uploadImage() async {
+    if (_imageFile == null) return null;
+
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profile_images/${DateTime.now().millisecondsSinceEpoch}');
+      final uploadTask = storageRef.putFile(File(_imageFile!.path));
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
+    } catch (e) {
+      print('Error uploading image: $e');
+      return null;
+    }
+  }
+
+  Future<void> _saveUserData() async {
+    if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isUpdating = true; // Show loader
+      });
+
+      try {
+        String? imageUrl;
+        if (_imageFile != null) {
+          imageUrl = await _uploadImage();
+        } else {
+          imageUrl = _profileImageUrl;
+        }
+
+        final userDoc =
+            FirebaseFirestore.instance.collection('users').doc(widget.uid);
+        Map<String, dynamic> data = {
+          'firstName': _firstNameController.text,
+          'lastName': _lastNameController.text,
+          'phoneNumber': _phoneNumberController.text,
+          'profileImageUrl': imageUrl,
+        };
+
+        await userDoc.update(data);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User details updated successfully')),
+        );
+        Navigator.of(context).pop();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating user details: $e')),
+        );
+      } finally {
+        setState(() {
+          _isUpdating = false; // Hide loader
+        });
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    UserRoleManager().init();
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.w800, color: Colors.black),
-        ),
         centerTitle: true,
+        title: const Text(
+          'Edit User Details',
+          style: TextStyle(
+              color: Colors.black, fontSize: 20, fontWeight: FontWeight.w800),
+        ),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: BlocListener<ProfileBloc, ProfileState>(
-            listener: (context, state) {
-              if (state is ProfileUpdated) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text('Profile updated successfully!')),
-                );
-              } else if (state is ProfileUpdateFailed) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                      content:
-                          Text('Failed to update profile: ${state.error}')),
-                );
-              }
-            },
-            child: BlocBuilder<ProfileBloc, ProfileState>(
-              builder: (context, state) {
-                if (state is UserProfileLoaded) {
-                  _firstNameController.text = state.firstName;
-                  _lastNameController.text = state.lastName;
-                  _phoneNumberController.text = state.phoneNumber;
-                }
-
-                File? pickedImage;
-                if (state is ProfileImagePicked) {
-                  pickedImage = state.profileImage;
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          context.read<ProfileBloc>().add(PickProfileImage());
-                        },
-                        child: CircleAvatar(
-                          radius: 50,
-                          /*   backgroundImage: pickedImage != null
-                              ? FileImage(pickedImage)
-                              : (state is UserProfileLoaded &&
-                                      state.profileImageUrl.isNotEmpty)
-                                  ? NetworkImage(state.profileImageUrl)
-                                  : null,*/
-                          child: pickedImage == null &&
-                                  (state is! UserProfileLoaded ||
-                                      state.profileImageUrl.isEmpty)
-                              ? const Icon(
-                                  Icons.camera_alt,
-                                  size: 50,
-                                )
-                              : null,
-                        ),
-                      ),
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundImage: _imageFile != null
+                      ? FileImage(File(_imageFile!.path))
+                          as ImageProvider<Object>?
+                      : (_profileImageUrl != null &&
+                              _profileImageUrl!.isNotEmpty)
+                          ? NetworkImage(_profileImageUrl!)
+                              as ImageProvider<Object>?
+                          : null,
+                  child: _imageFile == null &&
+                          (_profileImageUrl == null ||
+                              _profileImageUrl!.isEmpty)
+                      ? const Icon(Icons.add_a_photo, size: 50)
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _firstNameController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.blue.shade50,
+                  labelText: 'First Name',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter first name' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.blue.shade50,
+                  labelText: 'Last Name',
+                  prefixIcon: const Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter last name' : null,
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneNumberController,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.blue.shade50,
+                  labelText: 'Phone Number',
+                  prefixIcon: const Icon(Icons.phone),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2),
+                  ),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter phone number' : null,
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveUserData,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 15,
                     ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _firstNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'First Name',
-                        border: OutlineInputBorder(),
-                      ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _lastNameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Last Name',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: _phoneNumberController,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone Number',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          final firstName = _firstNameController.text;
-                          final lastName = _lastNameController.text;
-                          final phoneNumber = _phoneNumberController.text;
-
-                          context.read<ProfileBloc>().add(UpdateProfile(
-                                firstName: firstName,
-                                lastName: lastName,
-                                phoneNumber: phoneNumber,
-                                profileImage: pickedImage,
-                              ));
-
-                          if (UserRoleManager().currentRole == "admin") {
-                            Navigator.pushNamed(context, "/admin");
-                          } else if (UserRoleManager().currentRole ==
-                              "developer") {
-                            Navigator.pushNamed(context, "/developer");
-                          } else if (UserRoleManager().currentRole ==
-                              "manager") {
-                            Navigator.pushNamed(context, "/manager");
-                          } else if (UserRoleManager().currentRole ==
-                              "viewer") {
-                            Navigator.pushNamed(context, "/viewer");
-                          } else {
-                            const Text("No role here");
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 40,
-                            vertical: 15,
+                    backgroundColor: Colors.blue,
+                    elevation: 5,
+                  ),
+                  child: Center(
+                    child: _isUpdating
+                        ? const CircularProgressIndicator()
+                        : const Text(
+                            'Update Profile',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          backgroundColor: Colors.blue,
-                          elevation: 5,
-                        ),
-                        child: const Text(
-                          'Edit Profile',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

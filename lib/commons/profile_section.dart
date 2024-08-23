@@ -85,7 +85,7 @@ class ProfileSection extends StatelessWidget {
                         email,
                         style: const TextStyle(
                           fontSize: 16,
-                          color: Colors.grey,
+                          color: Colors.black45,
                         ),
                       ),
                     ],

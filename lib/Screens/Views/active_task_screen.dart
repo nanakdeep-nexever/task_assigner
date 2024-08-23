@@ -152,7 +152,6 @@ class TaskCard extends StatelessWidget {
     final isDeadlinePassed = _isPassed(deadline);
     final status = task['status'] ?? '';
 
-    // Determine the text color for the deadline
     final deadlineTextColor =
         isDeadlinePassed && !['Completed', 'Cancelled'].contains(status)
             ? Colors.red

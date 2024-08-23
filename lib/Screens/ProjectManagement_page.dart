@@ -6,7 +6,7 @@ import '_save_Project.dart';
 
 class ActiveProjectsScreen extends StatelessWidget {
   final Stream<int>? activeProjectsStream;
-  ActiveProjectsScreen({super.key, this.activeProjectsStream});
+  const ActiveProjectsScreen({super.key, this.activeProjectsStream});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,6 @@ class ActiveProjectsScreen extends StatelessWidget {
               final projectData = project.data() as Map<String, dynamic>;
 
               return _buildProjectCard(context, project.id, projectData, index);
-              ;
             },
           );
         },
