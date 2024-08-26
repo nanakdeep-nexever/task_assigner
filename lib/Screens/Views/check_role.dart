@@ -29,7 +29,6 @@ class UserRoleManager {
 
     if (uid != null) {
       _firestore.collection('users').doc(uid).snapshots().listen((snapshot) {
-        print(snapshot);
         if (snapshot.exists) {
           _currentRole = snapshot.data()?['role'] as String?;
           _roleController.add(_currentRole);
@@ -46,6 +45,11 @@ class UserRoleManager {
     return role == 'viewer';
   }
 
+  bool isDeveloper() {
+    String role = currentRole.toString();
+    return role == 'developer';
+  }
+
   bool isManager() {
     String role = currentRole.toString();
     return role == 'manager';
@@ -53,11 +57,7 @@ class UserRoleManager {
 
   bool isAdmin() {
     String role = currentRole.toString();
-    if (role == 'admin') {
-      return true;
-    } else {
-      return false;
-    }
+    return role == 'admin';
   }
 
   void dispose() {

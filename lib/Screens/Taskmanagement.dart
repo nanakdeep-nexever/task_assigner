@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 import 'package:task_assign_app/Screens/editTask_page.dart';
+import 'package:task_assign_app/commons/Common_Functions.dart';
 
 class ActiveTasksScreen extends StatelessWidget {
   ActiveTasksScreen({super.key});
@@ -144,8 +145,8 @@ class TaskCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final deadline = (task['deadline'] as Timestamp).toDate();
-    final isDeadlineToday = _isToday(deadline);
-    final isDeadlinePassed = _isPassed(deadline);
+    final isDeadlineToday = Common_function.isToday(deadline);
+    final isDeadlinePassed = Common_function.isPassed(deadline);
     final status = task['status'] ?? '';
 
     // Determine the text color for the deadline
@@ -246,16 +247,5 @@ class TaskCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  bool _isToday(DateTime date) {
-    final now = DateTime.now();
-    return now.year == date.year &&
-        now.month == date.month &&
-        now.day == date.day;
-  }
-
-  bool _isPassed(DateTime date) {
-    return date.isBefore(DateTime.now());
   }
 }

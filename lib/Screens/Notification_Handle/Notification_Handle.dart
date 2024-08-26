@@ -6,6 +6,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:googleapis_auth/auth_io.dart';
 import 'package:http/http.dart' as http;
 
+import '../../firebase_options.dart';
+
 class NotificationHandler {
   static String? _token;
   final FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin;
@@ -73,7 +75,17 @@ class NotificationHandler {
   static Future<void> _updateToken() async {
     try {
       final messaging = FirebaseMessaging.instance;
-      _token = await messaging.getToken();
+      var vapidKey =
+          "BMlvppFcsT5RAY3I1VMW2-hQAi6_v1tuj-TT-QBgsN6ocrfQwtbtBr7t_XUxISWC8Zv0atITmB0Jt2Ql8cb1vOM";
+      if (DefaultFirebaseOptions.currentPlatform ==
+          DefaultFirebaseOptions.web) {
+        _token = await FirebaseMessaging.instance.getToken(
+          vapidKey: vapidKey,
+        );
+      } else {
+        _token = await messaging.getToken();
+      }
+
       if (_token != null) {
         if (kDebugMode) print('Registration Token: $_token');
       } else {

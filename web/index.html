@@ -25,6 +25,60 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="task_assign_app">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-messaging.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBUKhNpZc37vV1OBRRJ6dOMiKlL005bCEQ",
+      authDomain: "project-tracker-nk.firebaseapp.com",
+      projectId: "project-tracker-nk",
+      storageBucket: "project-tracker-nk.appspot.com",
+      messagingSenderId: "454982685223",
+      appId: "1:454982685223:web:ac5a4a215961c9d4f0f402"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Retrieve Firebase Messaging object
+    const messaging = firebase.messaging();
+
+    // Register the service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+
+          // Get the FCM token
+          messaging.getToken({ vapidKey:'BMlvppFcsT5RAY3I1VMW2-hQAi6_v1tuj-TT-QBgsN6ocrfQwtbtBr7t_XUxISWC8Zv0atITmB0Jt2Ql8cb1vOM' }) // Replace with your VAPID key
+            .then((token) => {
+              console.log('FCM Token:', token);
+              // You can send this token to your server or use it as needed
+              // e.g., sendTokenToServer(token);
+            })
+            .catch((error) => {
+              console.error('Error getting FCM token:', error);
+            });
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+    }
+
+    // Handle foreground messages
+    messaging.onMessage((payload) => {
+  console.log('Message received. ', payload);
+  const notificationTitle = payload.notification.title;
+  const notificationOptions = {
+    body: payload.notification.body,
+    icon: 'icons/Icon-192.png'
+  };
+  if (Notification.permission === 'granted') {
+    new Notification(notificationTitle, notificationOptions);
+  }
+});
+
+  </script>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
@@ -36,7 +90,7 @@
   <script src="flutter_bootstrap.js" async></script>
   <script type="module">
     // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
     // TODO: Add SDKs for Firebase products that you want to use
     // https://firebase.google.com/docs/web/setup#available-libraries
 

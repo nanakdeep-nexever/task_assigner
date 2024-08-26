@@ -1,12 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:task_assign_app/commons/Common_Functions.dart';
 
 import 'Views/check_role.dart';
 import '_save_Project.dart';
 
 class ActiveProjectsScreen extends StatelessWidget {
   final Stream<int>? activeProjectsStream;
-  const ActiveProjectsScreen({super.key, this.activeProjectsStream});
+  ActiveProjectsScreen({super.key, this.activeProjectsStream});
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +44,7 @@ class ActiveProjectsScreen extends StatelessWidget {
               final projectData = project.data() as Map<String, dynamic>;
 
               return _buildProjectCard(context, project.id, projectData, index);
+              ;
             },
           );
         },
@@ -128,7 +130,8 @@ class ActiveProjectsScreen extends StatelessWidget {
                 ],
               ),
               FutureBuilder<String?>(
-                future: getManagerEmail(projectData["manager_id"] ?? ''),
+                future: Common_function.getManagerEmail(
+                    projectData["manager_id"] ?? ''),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return Text(

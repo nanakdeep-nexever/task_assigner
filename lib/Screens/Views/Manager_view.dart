@@ -2,11 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:task_assign_app/commons/Common_Functions.dart';
 
 import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
-import '../../commons/function.dart';
+import '../../Blocs/Management_bloc/management_bloc.dart';
+import '../../Blocs/Management_bloc/management_event.dart';
+import '../../Blocs/Management_bloc/management_state.dart';
 import '../ProjectManagement_page.dart';
 import '../Taskmanagement.dart';
 
@@ -18,70 +22,23 @@ class ManagerPage extends StatefulWidget {
 }
 
 class ManagerPageState extends State<ManagerPage> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-
-  late Stream<QuerySnapshot> _usersStream;
-  late Stream<QuerySnapshot> _usersTaskStream;
-  late Stream<QuerySnapshot> _usersProjectStream;
-  late Stream<int> _activeUsersStream;
-  late Stream<int> _activeTasksStream;
-  late Stream<int> _activeProjectsStream;
+  late ManagerPageBloc _managerPageBloc;
 
   @override
   void initState() {
     super.initState();
-    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
-      'status_online': true,
-    });
-    _usersStream = _firestore.collection('users').snapshots();
-    _usersTaskStream = _firestore.collection('tasks').snapshots();
-    _usersProjectStream = _firestore.collection('projects').snapshots();
-    _activeUsersStream = _getActiveUsersStream();
-    _activeTasksStream = _getActiveTasksStream();
-    _activeProjectsStream = _getActiveProjectsStream();
+    _managerPageBloc = ManagerPageBloc(FirebaseFirestore.instance);
+    _managerPageBloc.add(LoadActiveUsers());
+    _managerPageBloc.add(LoadActiveTasks());
+    _managerPageBloc.add(LoadActiveProjects());
+    _managerPageBloc.add(LoadUserTasks());
+    _managerPageBloc.add(LoadUserProjects());
   }
 
   @override
   void dispose() {
-    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
-      'status_online': false,
-    });
+    _managerPageBloc.close();
     super.dispose();
-  }
-
-  Stream<int> _getActiveUsersStream() {
-    return _firestore.collection('users').snapshots().map((snapshot) {
-      print("Active users count: ${snapshot.docs.length}"); // Debug print
-      return snapshot.docs.length;
-    });
-  }
-
-  Stream<int> _getActiveTasksStream() {
-    return _firestore
-        .collection('tasks')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.length);
-  }
-
-  Stream<int> _getActiveProjectsStream() {
-    return _firestore
-        .collection('projects')
-        .snapshots()
-        .map((snapshot) => snapshot.docs.length);
-  }
-
-  void _updateUserRole(String uid, String newRole) async {
-    try {
-      await _firestore.collection('users').doc(uid).update({
-        'role': newRole,
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Role updated successfully')));
-    } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error updating role: $e')));
-    }
   }
 
   @override
@@ -92,7 +49,7 @@ class ManagerPageState extends State<ManagerPage> {
           Navigator.pushReplacementNamed(context, '/');
         }
       },
-      builder: (context, state) {
+      builder: (context, authState) {
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
@@ -102,13 +59,13 @@ class ManagerPageState extends State<ManagerPage> {
                 width: 30,
               ),
               onPressed: () {
-                pushNamed(
+                Navigator.pushNamed(
                   context,
                   "/profile",
-                  {
+                  arguments: {
                     'heading': "Manager Profile",
                     "uName": FirebaseAuth.instance.currentUser?.displayName ??
-                        "Akash",
+                        "User",
                     "email": FirebaseAuth.instance.currentUser?.email
                   },
                 );
@@ -119,9 +76,10 @@ class ManagerPageState extends State<ManagerPage> {
             title: const Text(
               'Manager Dashboard',
               style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black),
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.black,
+              ),
             ),
             actions: [
               IconButton(
@@ -132,326 +90,99 @@ class ManagerPageState extends State<ManagerPage> {
               ),
             ],
           ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Manager",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
-                        fontSize: 18),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.15, // Adjust height as needed
-                    child: GridView.builder(
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        childAspectRatio: 1.5,
-                        crossAxisSpacing: 8.0,
-                        mainAxisSpacing: 8.0,
+          body: BlocBuilder<ManagerPageBloc, ManagerState>(
+            bloc: _managerPageBloc,
+            builder: (context, state) {
+              if (state is ManagerPageLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (state is ManagerPageError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Something went wrong!',
+                        style: const TextStyle(fontSize: 18, color: Colors.red),
                       ),
-                      itemBuilder: (context, index) {
-                        final titles = ['Active Tasks', 'Active Projects'];
-                        final colors = [Colors.green, Colors.orange];
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          // Retry logic
+                          _managerPageBloc.add(LoadActiveUsers());
+                          _managerPageBloc.add(LoadActiveTasks());
+                          _managerPageBloc.add(LoadActiveProjects());
+                          _managerPageBloc.add(LoadUserTasks());
+                          _managerPageBloc.add(LoadUserProjects());
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-                        final streams = [
-                          _activeTasksStream,
-                          _activeProjectsStream,
-                        ];
-                        final screens = [
-                          ActiveTasksScreen(),
-                          ActiveProjectsScreen(),
-                        ];
-
-                        /*  final screens = [
-                          const ActiveUserPage(),
-                          const ActiveTasksPage(),
-                          const ActiveProjectsPage()
-                        ];
-*/
-                        return InkWell(
+              if (state is ManagerPageLoaded) {
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Manager",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        DashboardGrid(
+                          titles: ['Active Tasks', 'Active Projects'],
+                          counts: [state.activeTasks, state.activeProjects],
+                          screens: [
+                            ActiveTasksScreen(),
+                            ActiveProjectsScreen()
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        SectionHeader(
+                          title: "Active Tasks",
                           onTap: () {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => screens[index],
+                                builder: (context) => ActiveTasksScreen(),
                               ),
                             );
                           },
-                          child: Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            color: colors[index],
-                            elevation: 4,
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(14.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      titles[index],
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    StreamBuilder<int>(
-                                      stream: streams[index],
-                                      builder: (context, snapshot) {
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting) {
-                                          return const Center(
-                                              child:
-                                                  CircularProgressIndicator());
-                                        }
-
-                                        if (snapshot.hasError) {
-                                          return Center(
-                                              child: Text(
-                                                  'Error: ${snapshot.error}'));
-                                        }
-
-                                        final count = snapshot.data ?? 0;
-                                        return Text(
-                                          '$count',
-                                          style: const TextStyle(
-                                            fontSize: 24,
-                                            color: Colors.white,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      itemCount: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Active Tasks",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                            fontSize: 18),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ActiveTasksScreen(),
-                            ),
-                          );
-                        },
-                        child: const Text(
-                          "See all",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                              fontSize: 18),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 4,
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: _usersTaskStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        }
-
-                        final users = snapshot.data?.docs ?? [];
-
-                        return ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: users.take(2).length,
-                          itemBuilder: (context, index) {
-                            final user = users[index];
-                            final uid = user.id;
-
-                            return Card(
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.green.withOpacity(0.1),
-                                        Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.green,
-                                      child: Text("${index + 1}"),
-                                    ),
-                                    title: Text(
-                                      "Task- ${user['name'] ?? 'No Name'}",
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    subtitle: Text(
-                                      "Assigned to- ${user["assignedTo"] ?? "nothing asssign"}",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ));
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Active Projects",
-                        style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                            fontSize: 18),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        const SizedBox(height: 10),
+                        TaskList(tasks: state.userTasks),
+                        const SizedBox(height: 10),
+                        SectionHeader(
+                          title: "Active Projects",
+                          onTap: () {
+                            Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => ActiveProjectsScreen(
-                                      activeProjectsStream:
-                                          _activeProjectsStream)));
-                        },
-                        child: const Text(
-                          "See all",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                              fontSize: 18),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height / 4,
-                    child: StreamBuilder<QuerySnapshot>(
-                      stream: _usersProjectStream,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        }
-
-                        final users = snapshot.data?.docs ?? [];
-
-                        return ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: users.take(2).length,
-                          itemBuilder: (context, index) {
-                            final user = users[index];
-                            final uid = user.id;
-
-                            return Card(
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 6,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.orange.withOpacity(0.1),
-                                        Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.orange,
-                                      child: Text("${index + 1}"),
-                                    ),
-                                    title: Text(
-                                      "Project- ${user['name'] ?? 'No Name'}",
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    subtitle: Text(
-                                      "Description- ${user["description"] ?? "no description"}",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ));
+                                builder: (context) => ActiveProjectsScreen(),
+                              ),
+                            );
                           },
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 10),
+                        ProjectList(projects: state.userProjects),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
+                );
+              }
+
+              return Container();
+            },
           ),
         );
       },
@@ -465,9 +196,11 @@ class ManagerPageState extends State<ManagerPage> {
         backgroundColor: Colors.red.shade50,
         elevation: 10,
         title: const Center(
-            child: Text('Confirm Logout',
-                style: TextStyle(
-                    fontWeight: FontWeight.w500, color: Colors.black))),
+          child: Text(
+            'Confirm Logout',
+            style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
+          ),
+        ),
         content: const Text(
           'Are you sure you want to log out?',
           style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
@@ -477,20 +210,275 @@ class ManagerPageState extends State<ManagerPage> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('Cancel',
-                style: TextStyle(
-                    fontWeight: FontWeight.w500, color: Colors.black)),
+            child: const Text(
+              'Cancel',
+              style:
+                  TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
+            ),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               context.read<AuthenticationBloc>().add(LogoutEvent());
             },
-            child: const Text('Logout',
-                style: TextStyle(
-                    fontWeight: FontWeight.w500, color: Colors.black)),
+            child: const Text(
+              'Logout',
+              style:
+                  TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  // DashboardGrid Widget
+  Widget DashboardGrid({
+    required List<String> titles,
+    required List<int> counts,
+    required List<Widget> screens,
+  }) {
+    final colors = [Colors.green, Colors.orange];
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.15,
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 1.5,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+        ),
+        itemBuilder: (context, index) {
+          return InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => screens[index],
+                ),
+              );
+            },
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              color: colors[index],
+              elevation: 4,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        titles[index],
+                        style: const TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${counts[index]}',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+        itemCount: titles.length,
+      ),
+    );
+  }
+
+  // SectionHeader Widget
+  Widget SectionHeader({
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+            fontSize: 18,
+          ),
+        ),
+        GestureDetector(
+          onTap: onTap,
+          child: const Text(
+            "See all",
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+              fontSize: 18,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // TaskList Widget
+  Widget TaskList({
+    required List<QueryDocumentSnapshot> tasks,
+  }) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height / 4,
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: tasks.take(2).length,
+        itemBuilder: (context, index) {
+          final Task = tasks[index];
+          final deadline = (Task['deadline'] as Timestamp).toDate();
+          final isDeadlineToday = Common_function.isToday(deadline);
+          final isDeadlinePassed = Common_function.isPassed(deadline);
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 5,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.green.withOpacity(0.1),
+                    Colors.white,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.green,
+                  child: Text("${index + 1}"),
+                ),
+                title: Text(
+                  "Task- ${Task['name'] ?? 'No Name'}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Assigned To: ${Task['assignedTo'] ?? 'Unknown'}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      'Deadline: ${DateFormat.yMd().format(deadline)} ${isDeadlineToday ? DateFormat.Hm().format(deadline) : ''}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ProjectList Widget
+  Widget ProjectList({
+    required List<QueryDocumentSnapshot> projects,
+  }) {
+    return SizedBox(
+      height: MediaQuery.of(context).size.height / 4,
+      child: ListView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: projects.take(2).length,
+        itemBuilder: (context, index) {
+          final project = projects[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 5,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.orange.withOpacity(0.1),
+                    Colors.white,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.orange,
+                  child: Text("${index + 1}"),
+                ),
+                title: Text(
+                  "Project- ${project['name'] ?? 'No Title'}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
+                ),
+                subtitle: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FutureBuilder<String?>(
+                      future: Common_function.getManagerEmail(
+                          project["manager_id"] ?? ''),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text(
+                            snapshot.data != null
+                                ? 'Manager: ${snapshot.data}'
+                                : 'Unassigned Manager',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black),
+                          );
+                        } else {
+                          return const Text('Unassigned Manager');
+                        }
+                      },
+                    ),
+                    Text(
+                      "Status: ${project['status'] ?? 'Unknown'}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

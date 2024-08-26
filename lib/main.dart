@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +7,7 @@ import 'package:get_it/get_it.dart';
 import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 
 import 'Blocs/AUTHentication/authentication_bloc.dart';
+import 'Blocs/AdminBloc/admin_bloc.dart';
 import 'Blocs/Management_bloc/management_bloc.dart';
 import 'Blocs/Messaging.dart';
 import 'Blocs/Notification_bloc/notification_bloc.dart';
@@ -28,6 +30,7 @@ import 'Screens/Views/complete_profile_screen.dart';
 import 'Screens/Views/reset_password_screen.dart';
 import 'Screens/Views/viewer_view.dart';
 import 'Screens/login.dart';
+import 'commons/LifeCycle.dart';
 import 'commons/profile_section.dart';
 import 'firebase_options.dart';
 
@@ -51,27 +54,38 @@ void main() async {
   // Initialize NotificationHandler
   await NotificationHandler.init();
   Bloc.observer = MyBlocObserver();
+  final appLifecycleObserver = AppLifecycleObserver();
+  WidgetsBinding.instance.addObserver(appLifecycleObserver);
 
   runApp(MyApp(
     messagingBloc: locator<MessagingBloc>(),
     notificationHandler: locator<NotificationHandler>(),
+    lifecycleObserver: appLifecycleObserver,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final MessagingBloc messagingBloc;
   final NotificationHandler notificationHandler;
+  final AppLifecycleObserver lifecycleObserver;
 
   const MyApp(
       {super.key,
       required this.messagingBloc,
       required this.notificationHandler});
+  const MyApp(
+      {required this.messagingBloc,
+      required this.notificationHandler,
+      required this.lifecycleObserver});
+
   @override
   Widget build(BuildContext context) {
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => AuthenticationBloc()),
-        BlocProvider(create: (context) => UserBloc()),
+        BlocProvider(create: (context) => ManagerPageBloc(_firestore)),
+        BlocProvider(create: (context) => AdminPageBloc()),
         BlocProvider(create: (context) => NotificationBloc()),
         BlocProvider(create: (context) => ProjectBloc()),
         BlocProvider(create: (context) => TaskBloc()),
@@ -92,7 +106,7 @@ class MyApp extends StatelessWidget {
       '/': (context) => const LoginPage(),
       '/splash': (context) => const SplashScreen(),
       '/register': (context) => const RegisterPage(),
-      '/admin': (context) => const AdminPage(),
+      '/admin': (context) => AdminPage(),
       '/manager': (context) => const ManagerPage(),
       '/developer': (context) => const DeveloperPage(),
       '/viewer': (context) => const ViewerPage(),

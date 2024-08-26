@@ -110,18 +110,16 @@ class AuthenticationBloc
   FutureOr<void> _Logout(
       LogoutEvent event, Emitter<AuthenticationState> emit) async {
     emit(AuthenticationLoading());
-    try {
-      await _firestore
+    _firebaseAuth.signOut().then((onValue) {
+      _firestore
           .collection('users')
           .doc(_firebaseAuth.currentUser?.uid)
           .update({
-        'status_online': 'false',
+        'status_online': false,
       });
-      await _firebaseAuth.signOut();
-      emit(AuthenticationUnauthenticated());
-    } catch (e) {
-      emit(AuthenticationError(message: e.toString()));
-    }
+    });
+
+    emit(AuthenticationUnauthenticated());
   }
 
   FutureOr<void> _PassReset(
