@@ -9,7 +9,20 @@ abstract class AdminPageEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoadDataEvent extends AdminPageEvent {}
+class LoadAdminDataEvent extends AdminPageEvent {
+  @override
+  List<Object> get props => [];
+}
+
+class UpdateUserRoleEvent extends AdminPageEvent {
+  final String uid;
+  final String newRole;
+
+  const UpdateUserRoleEvent({required this.uid, required this.newRole});
+
+  @override
+  List<Object> get props => [uid, newRole];
+}
 
 class UpdateUsersEvent extends AdminPageEvent {
   final List<Map<String, dynamic>> users;

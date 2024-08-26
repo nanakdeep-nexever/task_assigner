@@ -1,12 +1,11 @@
-// lib/Blocs/AdminBloc/admin_state.dart
+// admin_page_state.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class Admin_Page_State extends Equatable {
-  const Admin_Page_State();
-
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
 class AdminPageInitial extends Admin_Page_State {}
@@ -14,32 +13,38 @@ class AdminPageInitial extends Admin_Page_State {}
 class AdminPageLoading extends Admin_Page_State {}
 
 class AdminPageLoaded extends Admin_Page_State {
-  final int activeUsers;
-  final int activeTasks;
-  final int activeProjects;
-  final List<Map<String, dynamic>> users;
-  final List<Map<String, dynamic>> tasks;
-  final List<Map<String, dynamic>> projects;
+  final Stream<QuerySnapshot> activeUsersStream;
+  final Stream<QuerySnapshot> activeTasksStream;
+  final Stream<QuerySnapshot> activeProjectsStream;
+  final List<QueryDocumentSnapshot> users;
+  final List<QueryDocumentSnapshot> tasks;
+  final List<QueryDocumentSnapshot> projects;
 
-  const AdminPageLoaded({
-    required this.activeUsers,
-    required this.activeTasks,
-    required this.activeProjects,
+  AdminPageLoaded({
+    required this.activeUsersStream,
+    required this.activeTasksStream,
+    required this.activeProjectsStream,
     required this.users,
     required this.tasks,
     required this.projects,
   });
 
   @override
-  List<Object?> get props =>
-      [activeUsers, activeTasks, activeProjects, users, tasks, projects];
+  List<Object> get props => [
+        activeUsersStream,
+        activeTasksStream,
+        activeProjectsStream,
+        users,
+        tasks,
+        projects
+      ];
 }
 
 class AdminPageError extends Admin_Page_State {
   final String message;
 
-  const AdminPageError(this.message);
+  AdminPageError({required this.message});
 
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [message];
 }
