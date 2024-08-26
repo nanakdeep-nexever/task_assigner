@@ -453,7 +453,7 @@ class AdminPageState extends State<AdminPage> {
               );
             }
 
-            return Scaffold(
+            return const Scaffold(
               body: Center(child: Text('Unknown state')),
             );
           },

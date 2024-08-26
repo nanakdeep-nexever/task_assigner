@@ -34,24 +34,18 @@ class _LoginPageState extends State<LoginPage> {
           if (state is AuthenticationAuthenticated) {
             snack(context, "Login Successful");
 
-            Navigator.pushNamed(context, "/dashboard");
-
             _emailController.clear();
             _passwordController.clear();
             _firestore
                 .collection('users')
                 .doc(_firebaseAuth.currentUser?.uid.toString())
                 .update({'status_online': 'true'});
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Login Successfully")),
-            );
+
             print("Login SuccessFully");
             Navigator.pushNamed(context, "/dashboard");
           } else if (state is AuthenticationError) {
             print("Invalid Error");
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Invalid Error")),
-            );
+            snack(context, "Invalid credential");
           }
         },
         builder: (context, state) {

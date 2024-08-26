@@ -70,10 +70,6 @@ class MyApp extends StatelessWidget {
   final AppLifecycleObserver lifecycleObserver;
 
   const MyApp(
-      {super.key,
-      required this.messagingBloc,
-      required this.notificationHandler});
-  const MyApp(
       {required this.messagingBloc,
       required this.notificationHandler,
       required this.lifecycleObserver});

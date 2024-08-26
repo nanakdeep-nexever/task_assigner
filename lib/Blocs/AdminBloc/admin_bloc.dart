@@ -23,7 +23,6 @@ class AdminPageBloc extends Bloc<AdminPageEvent, Admin_Page_State> {
       final tasksStream = _firestore.collection('tasks').snapshots();
       final projectsStream = _firestore.collection('projects').snapshots();
 
-      // Listen to the data streams
       final users = await _firestore.collection('users').get();
       final tasks = await _firestore.collection('tasks').get();
       final projects = await _firestore.collection('projects').get();
