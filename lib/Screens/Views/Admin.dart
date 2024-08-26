@@ -32,9 +32,7 @@ class AdminPageState extends State<AdminPage> {
   @override
   void initState() {
     super.initState();
-    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
-      'status_online': true,
-    });
+
     _usersStream = _firestore.collection('users').snapshots();
     _usersTaskStream = _firestore.collection('tasks').snapshots();
     _usersProjectStream = _firestore.collection('projects').snapshots();

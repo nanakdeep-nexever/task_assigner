@@ -31,6 +31,7 @@ import 'Screens/Views/complete_profile_screen.dart';
 import 'Screens/Views/reset_password_screen.dart';
 import 'Screens/Views/viewer_view.dart';
 import 'Screens/login.dart';
+import 'commons/LifeCycle.dart';
 import 'commons/profile_section.dart';
 import 'firebase_options.dart';
 
@@ -55,18 +56,26 @@ void main() async {
 
   // Initialize NotificationHandler
   await NotificationHandler.init();
+  final appLifecycleObserver = AppLifecycleObserver();
+  WidgetsBinding.instance.addObserver(appLifecycleObserver);
 
   runApp(MyApp(
     messagingBloc: locator<MessagingBloc>(),
     notificationHandler: locator<NotificationHandler>(),
+    lifecycleObserver: appLifecycleObserver,
   ));
 }
 
 class MyApp extends StatelessWidget {
   final MessagingBloc messagingBloc;
   final NotificationHandler notificationHandler;
+  final AppLifecycleObserver lifecycleObserver;
 
-  const MyApp({required this.messagingBloc, required this.notificationHandler});
+  const MyApp(
+      {required this.messagingBloc,
+      required this.notificationHandler,
+      required this.lifecycleObserver});
+
   @override
   Widget build(BuildContext context) {
     FirebaseFirestore _firestore = FirebaseFirestore.instance;

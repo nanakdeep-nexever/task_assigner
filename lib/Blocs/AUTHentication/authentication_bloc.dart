@@ -123,10 +123,13 @@ class AuthenticationBloc
 
   FutureOr<void> _Logout(LogoutEvent event, Emitter<AuthenticationState> emit) {
     emit(AuthenticationLoading());
-    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
-      'status_online': false,
-    }).then((onValue) {
-      _firebaseAuth.signOut();
+    _firebaseAuth.signOut().then((onValue) {
+      _firestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser?.uid)
+          .update({
+        'status_online': false,
+      });
     });
 
     emit(AuthenticationUnauthenticated());

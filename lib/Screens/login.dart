@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +22,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    FirebaseFirestore _firestore = FirebaseFirestore.instance;
+    FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
     return Scaffold(
       body: BlocConsumer<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
@@ -27,6 +31,10 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushNamed(context, "/dashboard");
             _emailController.clear();
             _passwordController.clear();
+            _firestore
+                .collection('users')
+                .doc(_firebaseAuth.currentUser?.uid.toString())
+                .update({'status_online': 'true'});
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text(" Login Successfully")),
             );
