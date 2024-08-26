@@ -38,427 +38,273 @@ class AdminPageState extends State<AdminPage> {
         return BlocBuilder<AdminPageBloc, Admin_Page_State>(
           builder: (context, adminState) {
             if (adminState is AdminPageLoading) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
+              return _buildLoadingScreen();
             }
-
             if (adminState is AdminPageError) {
-              return Scaffold(
-                body: Center(child: Text('Error: ${adminState.message}')),
-              );
+              return _buildErrorScreen(adminState.message);
             }
-
             if (adminState is AdminPageLoaded) {
-              return Scaffold(
-                appBar: AppBar(
-                  leading: IconButton(
-                    icon: Image.asset(
-                      "assets/images/user.png",
-                      height: 30,
-                      width: 30,
-                    ),
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        "/profile",
-                        arguments: {'heading': "Admin Profile"},
-                      );
-                    },
-                  ),
-                  automaticallyImplyLeading: false,
-                  centerTitle: true,
-                  title: const Text(
-                    'Admin Dashboard',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black),
-                  ),
-                  actions: [
-                    IconButton(
-                      onPressed: () {
-                        showLogoutDialog();
-                      },
-                      icon: const Icon(Icons.logout),
-                    ),
-                  ],
-                ),
-                body: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Admin",
-                          style: TextStyle(
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                              fontSize: 18),
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.3,
-                          child: GridView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              childAspectRatio: 1.5,
-                              crossAxisSpacing: 8.0,
-                              mainAxisSpacing: 8.0,
-                            ),
-                            itemBuilder: (context, index) {
-                              final titles = [
-                                'Active Users',
-                                'Active Tasks',
-                                'Active Projects'
-                              ];
-                              final colors = [
-                                Colors.blue,
-                                Colors.green,
-                                Colors.orange
-                              ];
-
-                              final streams = [
-                                adminState.activeUsersStream,
-                                adminState.activeTasksStream,
-                                adminState.activeProjectsStream,
-                              ];
-
-                              final screens = [
-                                ActiveUsersScreen(),
-                                ActiveTasksScreen(),
-                                ActiveProjectsScreen(),
-                              ];
-
-                              return InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => screens[index],
-                                    ),
-                                  );
-                                },
-                                child: Card(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  color: colors[index],
-                                  elevation: 4,
-                                  child: Center(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(14.0),
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            titles[index],
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          StreamBuilder<QuerySnapshot>(
-                                            stream: streams[index],
-                                            builder: (context, snapshot) {
-                                              if (snapshot.connectionState ==
-                                                  ConnectionState.waiting) {
-                                                return const Center(
-                                                    child:
-                                                        CircularProgressIndicator());
-                                              }
-
-                                              if (snapshot.hasError) {
-                                                return Center(
-                                                    child: Text(
-                                                        'Error: ${snapshot.error}'));
-                                              }
-
-                                              final count =
-                                                  snapshot.data?.docs.length ??
-                                                      0;
-                                              return Text(
-                                                '$count',
-                                                style: const TextStyle(
-                                                  fontSize: 24,
-                                                  color: Colors.white,
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                            itemCount: 3,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Active Users",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                  fontSize: 18),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ActiveUsersScreen(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "See all",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                    fontSize: 18),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height / 4,
-                          child: ListView.builder(
-                            itemCount: adminState.users.take(2).length,
-                            itemBuilder: (context, index) {
-                              final users = adminState.users.elementAt(index);
-
-                              return Card(
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.blue.withOpacity(0.3),
-                                        Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.blue,
-                                      child: Text("${index + 1}"),
-                                    ),
-                                    title: Text(
-                                      "User- ${users['email'] ?? 'No Name'}",
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    subtitle: Text(
-                                      "Role- ${users["role"] ?? ""}",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Active Task",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                  fontSize: 18),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ActiveTasksScreen(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "See all",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                    fontSize: 18),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height / 4,
-                          child: ListView.builder(
-                            itemCount: adminState.users.take(2).length,
-                            itemBuilder: (context, index) {
-                              final task = adminState.tasks.elementAt(index);
-
-                              return Card(
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.green.withOpacity(0.1),
-                                        Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.green,
-                                      child: Text("${index + 1}"),
-                                    ),
-                                    title: Text(
-                                      "User- ${task['name'] ?? 'No Name'}",
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    subtitle: Text(
-                                      "Assigned- ${task["assignedTo"] ?? ""}",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Active Projects",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.black,
-                                  fontSize: 18),
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        ActiveProjectsScreen(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "See all",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                    fontSize: 18),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height / 4,
-                          child: ListView.builder(
-                            itemCount: adminState.projects.take(2).length,
-                            itemBuilder: (context, index) {
-                              final project =
-                                  adminState.projects.elementAt(index);
-
-                              return Card(
-                                margin: const EdgeInsets.symmetric(vertical: 6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                elevation: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.orange.withOpacity(0.1),
-                                        Colors.white
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundColor: Colors.orange,
-                                      child: Text("${index + 1}"),
-                                    ),
-                                    title: Text(
-                                      "Project- ${project['name'] ?? 'No Name'}",
-                                      style: const TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w500),
-                                    ),
-                                    subtitle: Text(
-                                      "Description- ${project["description"] ?? "no description"}",
-                                      style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.w400),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
+              return _buildLoadedScreen(adminState);
             }
-
-            return const Scaffold(
-              body: Center(child: Text('Unknown state')),
-            );
+            return _buildUnknownStateScreen();
           },
         );
       },
+    );
+  }
+
+  Widget _buildLoadingScreen() {
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildErrorScreen(String message) {
+    return Scaffold(
+      body: Center(child: Text('Error: $message')),
+    );
+  }
+
+  Widget _buildLoadedScreen(AdminPageLoaded adminState) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Image.asset("assets/images/user.png", height: 30, width: 30),
+          onPressed: () {
+            Navigator.pushNamed(
+              context,
+              "/profile",
+              arguments: {'heading': "Admin Profile"},
+            );
+          },
+        ),
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        title: const Text(
+          'Admin Dashboard',
+          style: TextStyle(
+              fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black),
+        ),
+        actions: [
+          IconButton(
+            onPressed: showLogoutDialog,
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildSectionTitle("Admin"),
+              const SizedBox(height: 10),
+              _buildGridSection(adminState),
+              const SizedBox(height: 10),
+              _buildListSection("Active Users", adminState.users, Colors.blue,
+                  "email", "role"),
+              const SizedBox(height: 10),
+              _buildListSection("Active Tasks", adminState.tasks, Colors.green,
+                  "name", "assignedTo"),
+              const SizedBox(height: 10),
+              _buildListSection("Active Projects", adminState.projects,
+                  Colors.orange, "name", "description"),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUnknownStateScreen() {
+    return Scaffold(
+      body: Center(child: Text('Unknown state')),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+          fontWeight: FontWeight.w500, color: Colors.black, fontSize: 18),
+    );
+  }
+
+  Widget _buildGridSection(AdminPageLoaded adminState) {
+    final titles = ['Active Users', 'Active Tasks', 'Active Projects'];
+    final colors = [Colors.blue, Colors.green, Colors.orange];
+    final streams = [
+      adminState.activeUsersStream,
+      adminState.activeTasksStream,
+      adminState.activeProjectsStream,
+    ];
+    final screens = [
+      ActiveUsersScreen(),
+      ActiveTasksScreen(),
+      ActiveProjectsScreen(),
+    ];
+
+    return SizedBox(
+      height: MediaQuery.of(context).size.height * 0.3,
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 1.5,
+          crossAxisSpacing: 8.0,
+          mainAxisSpacing: 8.0,
+        ),
+        itemBuilder: (context, index) {
+          return _buildGridItem(
+              titles[index], colors[index], streams[index], screens[index]);
+        },
+        itemCount: titles.length,
+      ),
+    );
+  }
+
+  Widget _buildGridItem(
+      String title, Color color, Stream<QuerySnapshot> stream, Widget screen) {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => screen,
+          ),
+        );
+      },
+      child: Card(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        color: color,
+        elevation: 4,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                StreamBuilder<QuerySnapshot>(
+                  stream: stream,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    }
+                    final count = snapshot.data?.docs.length ?? 0;
+                    return Text(
+                      '$count',
+                      style: const TextStyle(fontSize: 24, color: Colors.white),
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListSection(
+      String title,
+      List<QueryDocumentSnapshot<Object?>> items,
+      Color color,
+      String titleKey,
+      String subtitleKey) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildSectionTitle(title),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      if (title == "Active Users") {
+                        return ActiveUsersScreen();
+                      } else if (title == "Active Tasks") {
+                        return ActiveTasksScreen();
+                      } else {
+                        return ActiveProjectsScreen();
+                      }
+                    },
+                  ),
+                );
+              },
+              child: const Text(
+                "See all",
+                style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                    fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: MediaQuery.of(context).size.height / 4,
+          child: ListView.builder(
+            itemCount: items.take(2).length,
+            itemBuilder: (context, index) {
+              final item = items[index];
+              return Card(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15)),
+                elevation: 5,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [color.withOpacity(0.1), Colors.white],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: color,
+                      child: Text("${index + 1}"),
+                    ),
+                    title: Text(
+                      "${titleKey == 'email' ? 'User-' : title == 'Active Tasks' ? 'Task-' : 'Project-'} ${item[titleKey] ?? 'No Name'}",
+                      style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    subtitle: Text(
+                      "${subtitleKey == 'assignedTo' ? 'Assigned-' : subtitleKey == 'description' ? 'Description-' : 'Role-'} ${item[subtitleKey] ?? ""}",
+                      style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -469,9 +315,10 @@ class AdminPageState extends State<AdminPage> {
         backgroundColor: Colors.red.shade50,
         elevation: 10,
         title: const Center(
-            child: Text('Confirm Logout',
-                style: TextStyle(
-                    fontWeight: FontWeight.w500, color: Colors.black))),
+          child: Text('Confirm Logout',
+              style:
+                  TextStyle(fontWeight: FontWeight.w500, color: Colors.black)),
+        ),
         content: const Text(
           'Are you sure you want to log out?',
           style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),

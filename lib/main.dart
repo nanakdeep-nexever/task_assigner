@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get_it/get_it.dart';
+import 'package:task_assign_app/Blocs/developer_view/develop_bloc.dart';
 import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 
 import 'Blocs/AUTHentication/authentication_bloc.dart';
@@ -85,6 +86,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => NotificationBloc()),
         BlocProvider(create: (context) => ProjectBloc()),
         BlocProvider(create: (context) => TaskBloc()),
+        BlocProvider(create: (context) => DevelopBloc(_firestore)),
         BlocProvider(create: (context) => ProfileBloc()),
         BlocProvider(create: (context) => RoleCubit()),
       ],
