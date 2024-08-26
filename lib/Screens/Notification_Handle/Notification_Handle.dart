@@ -20,8 +20,9 @@ class NotificationHandler {
         badge: true,
         sound: true,
       );
-      if (kDebugMode)
+      if (kDebugMode) {
         print('Permission granted: ${settings.authorizationStatus}');
+      }
       await _updateToken();
     } catch (e, s) {
       print("Error during initialization: $e");

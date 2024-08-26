@@ -43,73 +43,59 @@ class AuthenticationBloc
             .collection('users')
             .doc(userCredential.user!.uid)
             .get();
+
         if (NotificationHandler.token.toString().isNotEmpty) {
           await _firestore
               .collection('users')
               .doc(userCredential.user!.uid)
               .update({'FCM-token': NotificationHandler.token});
         }
-        String? role;
-        if (userDoc.data() != null) {
-          role = userDoc['role'];
+
+        if (userDoc.exists) {
+          String? role = userDoc['role'];
           if (userDoc['status_online'].toString() == 'false') {
             emit(AuthenticationAuthenticated(userId: role));
           } else {
             emit(AuthenticationError(
-                message: "User already LoggedIn on other device"));
+                message: "User already logged in on another device"));
           }
-        } else {
-          _firestore
+        }
+        //
+        else {
+          await _firestore
               .collection('users')
-              .doc(_firebaseAuth.currentUser?.uid.toString())
+              .doc(_firebaseAuth.currentUser!.uid)
               .set({
-            'email': _firebaseAuth.currentUser?.email.toString(),
+            'email': _firebaseAuth.currentUser!.email,
             'role': 'viewer',
             'status_online': 'false'
           });
           emit(AuthenticationAuthenticated(
-              userId: _firebaseAuth.currentUser?.email));
+              userId: _firebaseAuth.currentUser!.email));
         }
       }
     } catch (e) {
       emit(AuthenticationError(message: e.toString()));
+    } finally {
+      print('Loging----------------------------');
     }
   }
 
   FutureOr<void> _Register(
       RegisterEvent event, Emitter<AuthenticationState> emit) async {
     emit(AuthenticationLoading());
-
     try {
       UserCredential userCredential =
           await _firebaseAuth.createUserWithEmailAndPassword(
               email: event.email, password: event.password);
 
-      if (_firebaseAuth.currentUser?.uid != null &&
-          NotificationHandler.token.toString().isNotEmpty) {
-        _firestore
-            .collection('users')
-            .doc(_firebaseAuth.currentUser?.uid.toString())
-            .set({
-          'email': _firebaseAuth.currentUser?.email.toString(),
-          'role': 'viewer',
-          'status_online': 'false'
-        });
-        DocumentSnapshot userDoc = await _firestore
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .get();
-        String? role;
-        if (userDoc.data() != null) {
-          role = userDoc['role'];
-          if (userDoc['status_online'].toString() == 'false') {
-            emit(AuthenticationAuthenticated(userId: role));
-          } else {
-            emit(AuthenticationError(
-                message: "User already LoggedIn on other device"));
-          }
-        }
-      }
+      await _firestore.collection('users').doc(userCredential.user!.uid).set({
+        'email': userCredential.user!.email,
+        'role': 'viewer',
+        'status_online': 'false'
+      });
+
+      emit(AuthenticationAuthenticated(userId: 'viewer'));
     } catch (e) {
       emit(AuthenticationError(message: e.toString()));
     }
@@ -121,15 +107,21 @@ class AuthenticationBloc
     emit(PasswordVisibilityState(isPasswordVisible: _isPasswordVisible));
   }
 
-  FutureOr<void> _Logout(LogoutEvent event, Emitter<AuthenticationState> emit) {
+  FutureOr<void> _Logout(
+      LogoutEvent event, Emitter<AuthenticationState> emit) async {
     emit(AuthenticationLoading());
-    _firestore.collection('users').doc(_firebaseAuth.currentUser?.uid).update({
-      'status_online': false,
-    }).then((onValue) {
-      _firebaseAuth.signOut();
-    });
-
-    emit(AuthenticationUnauthenticated());
+    try {
+      await _firestore
+          .collection('users')
+          .doc(_firebaseAuth.currentUser?.uid)
+          .update({
+        'status_online': 'false',
+      });
+      await _firebaseAuth.signOut();
+      emit(AuthenticationUnauthenticated());
+    } catch (e) {
+      emit(AuthenticationError(message: e.toString()));
+    }
   }
 
   FutureOr<void> _PassReset(
@@ -137,9 +129,9 @@ class AuthenticationBloc
     emit(AuthenticationLoading());
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: event.email);
-      emit(PasswordResetEmailSent()); // Emit success state
+      emit(PasswordResetEmailSent());
     } catch (e) {
-      emit(PasswordResetError(message: e.toString())); // Emit error state
+      emit(PasswordResetError(message: e.toString()));
     }
   }
 
@@ -150,9 +142,7 @@ class AuthenticationBloc
       final user = _firebaseAuth.currentUser;
       if (user != null) {
         await _firestore.collection('users').doc(user.uid).delete();
-
         await user.delete();
-
         emit(AuthenticationUnauthenticated());
       } else {
         emit(AuthenticationError(message: "No user currently authenticated"));
@@ -164,7 +154,6 @@ class AuthenticationBloc
 
   FutureOr<void> rolechange(
       AuthenticationRoleChanged event, Emitter<AuthenticationState> emit) {
-    print("Role is ${event.role}");
     emit(RoleChanged(role: event.role));
   }
 

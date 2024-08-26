@@ -147,8 +147,7 @@ class AdminPageState extends State<AdminPage> {
                     height: 10,
                   ),
                   SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.3, // Adjust height as needed
+                    height: MediaQuery.of(context).size.height * 0.3,
                     child: GridView.builder(
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate:
@@ -182,12 +181,6 @@ class AdminPageState extends State<AdminPage> {
                           ActiveProjectsScreen(),
                         ];
 
-                        /*  final screens = [
-                          const ActiveUserPage(),
-                          const ActiveTasksPage(),
-                          const ActiveProjectsPage()
-                        ];
-*/
                         return InkWell(
                           onTap: () {
                             Navigator.push(

@@ -128,7 +128,7 @@ class ProfileSection extends StatelessWidget {
                         height: 14,
                       ),
                 UserRoleManager().isAdmin()
-                    ? SizedBox()
+                    ? const SizedBox()
                     : commonTiles("Delete Account", Icons.delete, () {
                         showDeleteAccountDialog(
                           "Delete Account",

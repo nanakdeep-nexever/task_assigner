@@ -45,13 +45,12 @@ void setupLocator() {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   setupLocator();
 
   // Initialize NotificationHandler
   await NotificationHandler.init();
+  Bloc.observer = MyBlocObserver();
 
   runApp(MyApp(
     messagingBloc: locator<MessagingBloc>(),
@@ -63,7 +62,10 @@ class MyApp extends StatelessWidget {
   final MessagingBloc messagingBloc;
   final NotificationHandler notificationHandler;
 
-  const MyApp({required this.messagingBloc, required this.notificationHandler});
+  const MyApp(
+      {super.key,
+      required this.messagingBloc,
+      required this.notificationHandler});
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -107,7 +109,6 @@ class MyApp extends StatelessWidget {
         return ProfileSection(heading: data?['heading'] ?? "");
       },
     };
-
     return MaterialPageRoute(
       builder: routes[settings.name] ?? (context) => const SplashScreen(),
       settings: settings,
@@ -118,4 +119,30 @@ class MyApp extends StatelessWidget {
 class AppConfig {
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
+}
+
+class MyBlocObserver extends BlocObserver {
+  @override
+  void onEvent(Bloc bloc, Object? event) {
+    super.onEvent(bloc, event);
+    print('Event: ${bloc.runtimeType}, $event');
+  }
+
+  @override
+  void onChange(BlocBase bloc, Change change) {
+    super.onChange(bloc, change);
+    print('Change: ${bloc.runtimeType}, $change');
+  }
+
+  @override
+  void onTransition(Bloc bloc, Transition transition) {
+    super.onTransition(bloc, transition);
+    print('Transition: ${bloc.runtimeType}, $transition');
+  }
+
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    super.onError(bloc, error, stackTrace);
+    print('Error: ${bloc.runtimeType}, $error, $stackTrace');
+  }
 }
