@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 import 'management_event.dart';
 import 'management_state.dart';
@@ -24,28 +25,32 @@ class ManagerPageBloc extends Bloc<ManagerPageEvent, ManagerState> {
   }
 
   void _initializeStreams() {
-    _usersSubscription =
-        _firestore.collection('users').snapshots().listen((snapshot) {
-      add(LoadActiveUsers()); // Trigger event to update state with active users
+    _usersSubscription = _firestore
+        .collection(Com_string.Firebase_collection_users)
+        .snapshots()
+        .listen((snapshot) {
+      add(LoadActiveUsers());
     });
 
     _tasksSubscription =
         _firestore.collection('tasks').snapshots().listen((snapshot) {
-      add(LoadActiveTasks()); // Trigger event to update state with active tasks
-      add(LoadUserTasks()); // Trigger event to update user tasks
+      add(LoadActiveTasks());
+      add(LoadUserTasks());
     });
 
     _projectsSubscription =
         _firestore.collection('projects').snapshots().listen((snapshot) {
-      add(LoadActiveProjects()); // Trigger event to update state with active projects
-      add(LoadUserProjects()); // Trigger event to update user projects
+      add(LoadActiveProjects());
+      add(LoadUserProjects());
     });
   }
 
   Future<void> _onLoadActiveUsers(
       LoadActiveUsers event, Emitter<ManagerState> emit) async {
     try {
-      final snapshot = await _firestore.collection('users').get();
+      final snapshot = await _firestore
+          .collection(Com_string.Firebase_collection_users)
+          .get();
       emit(
         ManagerPageLoaded(
           activeUsers: snapshot.docs.length,

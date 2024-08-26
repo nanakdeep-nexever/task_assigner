@@ -3,6 +3,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../generated/Strings_s.dart';
 import 'admin_event.dart';
 import 'admin_state.dart';
 
@@ -19,11 +20,15 @@ class AdminPageBloc extends Bloc<AdminPageEvent, Admin_Page_State> {
     emit(AdminPageLoading());
 
     try {
-      final usersStream = _firestore.collection('users').snapshots();
+      final usersStream = _firestore
+          .collection(Com_string.Firebase_collection_users)
+          .snapshots();
       final tasksStream = _firestore.collection('tasks').snapshots();
       final projectsStream = _firestore.collection('projects').snapshots();
 
-      final users = await _firestore.collection('users').get();
+      final users = await _firestore
+          .collection(Com_string.Firebase_collection_users)
+          .get();
       final tasks = await _firestore.collection('tasks').get();
       final projects = await _firestore.collection('projects').get();
 
@@ -43,8 +48,11 @@ class AdminPageBloc extends Bloc<AdminPageEvent, Admin_Page_State> {
   Future<void> _onUpdateUserRole(
       UpdateUserRoleEvent event, Emitter<Admin_Page_State> emit) async {
     try {
-      await _firestore.collection('users').doc(event.uid).update({
-        'role': event.newRole,
+      await _firestore
+          .collection(Com_string.Firebase_collection_users)
+          .doc(event.uid)
+          .update({
+        Com_string.role: event.newRole,
       });
       add(LoadAdminDataEvent()); // Reload data after update
     } catch (e) {

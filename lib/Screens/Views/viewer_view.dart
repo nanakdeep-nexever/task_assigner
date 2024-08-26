@@ -8,6 +8,7 @@ import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import '../../Blocs/AdminBloc/admin_bloc.dart';
 import '../../Blocs/AdminBloc/admin_event.dart';
+import '../../generated/Strings_s.dart';
 import '../ProjectManagement_page.dart';
 import '../Taskmanagement.dart';
 import 'active_user_screens.dart';
@@ -102,14 +103,14 @@ class ViewerPageState extends State<ViewerPage> {
               const SizedBox(height: 10),
               _buildGridSection(adminState),
               const SizedBox(height: 10),
-              _buildListSection("Active Users", adminState.users, Colors.blue,
-                  "email", "role"),
+              _buildListSection(Com_string.Active_Users, adminState.users,
+                  Colors.blue, Com_string.email, Com_string.role),
               const SizedBox(height: 10),
-              _buildListSection("Active Tasks", adminState.tasks, Colors.green,
-                  "name", "assignedTo"),
+              _buildListSection(Com_string.Active_Tasks, adminState.tasks,
+                  Colors.green, Com_string.name, Com_string.assignedTo),
               const SizedBox(height: 10),
-              _buildListSection("Active Projects", adminState.projects,
-                  Colors.orange, "name", "description"),
+              _buildListSection(Com_string.Active_Projects, adminState.projects,
+                  Colors.orange, Com_string.name, Com_string.description),
             ],
           ),
         ),
@@ -237,9 +238,9 @@ class ViewerPageState extends State<ViewerPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      if (title == "Active Users") {
+                      if (title == Com_string.Active_Users) {
                         return ActiveUsersScreen();
-                      } else if (title == "Active Tasks") {
+                      } else if (title == Com_string.Active_Tasks) {
                         return ActiveTasksScreen();
                       } else {
                         return ActiveProjectsScreen();
@@ -285,7 +286,7 @@ class ViewerPageState extends State<ViewerPage> {
                       child: Text("${index + 1}"),
                     ),
                     title: Text(
-                      "${titleKey == 'email' ? 'User-' : title == 'Active Tasks' ? 'Task-' : 'Project-'} ${item[titleKey] ?? 'No Name'}",
+                      "${titleKey == Com_string.email ? 'User-' : title == 'Active Tasks' ? 'Task-' : 'Project-'} ${item[titleKey] ?? 'No Name'}",
                       style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black,

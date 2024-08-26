@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 class AppLifecycleObserver extends WidgetsBindingObserver {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -42,8 +43,11 @@ class AppLifecycleObserver extends WidgetsBindingObserver {
   }
 
   void _updateUserStatus(String userId, bool isOnline) {
-    _firestore.collection('users').doc(userId).update({
-      'status_online': isOnline,
+    _firestore
+        .collection(Com_string.Firebase_collection_users)
+        .doc(userId)
+        .update({
+      Com_string.Status_online: isOnline,
     }).catchError((error) {
       print("Failed to update user status: $error");
     });

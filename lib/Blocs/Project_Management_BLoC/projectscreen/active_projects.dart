@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 import '../project_manage_bloc.dart';
 import '../project_manage_event.dart';
@@ -86,7 +87,7 @@ class ActiveProjectsPage extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                   color: Colors.black)),
                           Text(
-                              project["description"] != null
+                              project[Com_string.description] != null
                                   ? 'Description: ${project['description']}'
                                   : 'No description',
                               style: const TextStyle(

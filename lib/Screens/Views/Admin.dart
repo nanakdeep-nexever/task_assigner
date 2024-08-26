@@ -8,6 +8,7 @@ import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import '../../Blocs/AdminBloc/admin_bloc.dart';
 import '../../Blocs/AdminBloc/admin_event.dart';
+import '../../generated/Strings_s.dart';
 import '../ProjectManagement_page.dart';
 import '../Taskmanagement.dart';
 import 'active_user_screens.dart';
@@ -81,7 +82,7 @@ class AdminPageState extends State<AdminPage> {
         automaticallyImplyLeading: false,
         centerTitle: true,
         title: const Text(
-          'Admin Dashboard',
+          Com_string.Admin_Dashboard,
           style: TextStyle(
               fontSize: 20, fontWeight: FontWeight.w700, color: Colors.black),
         ),
@@ -98,18 +99,18 @@ class AdminPageState extends State<AdminPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle("Admin"),
+              _buildSectionTitle(Com_string.Admin),
               const SizedBox(height: 10),
               _buildGridSection(adminState),
               const SizedBox(height: 10),
-              _buildListSection("Active Users", adminState.users, Colors.blue,
-                  "email", "role"),
+              _buildListSection(Com_string.Active_Users, adminState.users,
+                  Colors.blue, Com_string.email, Com_string.role),
               const SizedBox(height: 10),
-              _buildListSection("Active Tasks", adminState.tasks, Colors.green,
-                  "name", "assignedTo"),
+              _buildListSection(Com_string.Active_Tasks, adminState.tasks,
+                  Colors.green, Com_string.name, Com_string.assignedTo),
               const SizedBox(height: 10),
-              _buildListSection("Active Projects", adminState.projects,
-                  Colors.orange, "name", "description"),
+              _buildListSection(Com_string.Active_Projects, adminState.projects,
+                  Colors.orange, Com_string.name, Com_string.description),
             ],
           ),
         ),
@@ -132,7 +133,11 @@ class AdminPageState extends State<AdminPage> {
   }
 
   Widget _buildGridSection(AdminPageLoaded adminState) {
-    final titles = ['Active Users', 'Active Tasks', 'Active Projects'];
+    final titles = [
+      Com_string.Active_Users,
+      Com_string.Active_Tasks,
+      Com_string.Active_Projects
+    ];
     final colors = [Colors.blue, Colors.green, Colors.orange];
     final streams = [
       adminState.activeUsersStream,
@@ -237,9 +242,9 @@ class AdminPageState extends State<AdminPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) {
-                      if (title == "Active Users") {
+                      if (title == Com_string.Active_Users) {
                         return ActiveUsersScreen();
-                      } else if (title == "Active Tasks") {
+                      } else if (title == Com_string.Active_Tasks) {
                         return ActiveTasksScreen();
                       } else {
                         return ActiveProjectsScreen();
@@ -285,14 +290,14 @@ class AdminPageState extends State<AdminPage> {
                       child: Text("${index + 1}"),
                     ),
                     title: Text(
-                      "${titleKey == 'email' ? 'User-' : title == 'Active Tasks' ? 'Task-' : 'Project-'} ${item[titleKey] ?? 'No Name'}",
+                      "${titleKey == Com_string.email ? 'User-' : title == Com_string.Active_Users ? 'Task-' : 'Project-'} ${item[titleKey] ?? 'No Name'}",
                       style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black,
                           fontWeight: FontWeight.w500),
                     ),
                     subtitle: Text(
-                      "${subtitleKey == 'assignedTo' ? 'Assigned-' : subtitleKey == 'description' ? 'Description-' : 'Role-'} ${item[subtitleKey] ?? ""}",
+                      "${subtitleKey == Com_string.assignedTo ? 'Assigned-' : subtitleKey == Com_string.description ? 'Description-' : 'Role-'} ${item[subtitleKey] ?? ""}",
                       style: const TextStyle(
                           fontSize: 14,
                           color: Colors.black,
@@ -315,12 +320,12 @@ class AdminPageState extends State<AdminPage> {
         backgroundColor: Colors.red.shade50,
         elevation: 10,
         title: const Center(
-          child: Text('Confirm Logout',
+          child: Text(Com_string.Confirm_Logout,
               style:
                   TextStyle(fontWeight: FontWeight.w500, color: Colors.black)),
         ),
         content: const Text(
-          'Are you sure you want to log out?',
+          Com_string.Confirm_Logout_message,
           style: TextStyle(fontWeight: FontWeight.w500, color: Colors.black),
         ),
         actions: [
@@ -328,7 +333,7 @@ class AdminPageState extends State<AdminPage> {
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: const Text('Cancel',
+            child: const Text(Com_string.Cancel,
                 style: TextStyle(
                     fontWeight: FontWeight.w500, color: Colors.black)),
           ),
@@ -337,7 +342,7 @@ class AdminPageState extends State<AdminPage> {
               Navigator.of(context).pop();
               context.read<AuthenticationBloc>().add(LogoutEvent());
             },
-            child: const Text('Logout',
+            child: const Text(Com_string.Logout,
                 style: TextStyle(
                     fontWeight: FontWeight.w500, color: Colors.black)),
           ),

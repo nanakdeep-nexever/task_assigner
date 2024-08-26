@@ -9,6 +9,7 @@ import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
 import '../../Blocs/AUTHentication/authentication_state.dart';
 import '../../Blocs/developer_view/develop_event.dart';
+import '../../generated/Strings_s.dart';
 import '../Taskmanagement.dart';
 
 class DeveloperPage extends StatefulWidget {
@@ -39,8 +40,11 @@ class DeveloperPageState extends State<DeveloperPage> {
     try {
       final userId = _firebaseAuth.currentUser?.uid;
       if (userId != null) {
-        await _firestore.collection('users').doc(userId).update({
-          'status_online': isOnline,
+        await _firestore
+            .collection(Com_string.Firebase_collection_users)
+            .doc(userId)
+            .update({
+          Com_string.Status_online: isOnline,
         });
       }
     } catch (e) {
@@ -110,7 +114,7 @@ class DeveloperPageState extends State<DeveloperPage> {
                   arguments: {
                     'heading': "Developer Profile",
                     "uName": "Akash",
-                    "email": "jddhfj@gmail.com"
+                    Com_string.email: "jddhfj@gmail.com"
                   },
                 );
               },
@@ -185,7 +189,7 @@ class DeveloperPageState extends State<DeveloperPage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       const Text(
-                                        "Active Tasks",
+                                        Com_string.Active_Tasks,
                                         style: TextStyle(
                                           fontSize: 18,
                                           color: Colors.white,
@@ -213,7 +217,7 @@ class DeveloperPageState extends State<DeveloperPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            "Active Tasks",
+                            Com_string.Active_Tasks,
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               color: Colors.black,
@@ -280,7 +284,7 @@ class DeveloperPageState extends State<DeveloperPage> {
                                     ),
                                   ),
                                   subtitle: Text(
-                                    "Assigned to- ${user["assignedTo"] ?? "nothing assigned"}",
+                                    "Assigned to- ${user[Com_string.assignedTo] ?? "nothing assigned"}",
                                     style: const TextStyle(
                                       fontSize: 14,
                                       color: Colors.black,

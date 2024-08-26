@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 import 'Notification_Handle/Notification_Handle.dart';
 import 'Views/check_role.dart';
@@ -51,9 +52,10 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   Future<String?> getDocumentIdByEmail(String email) async {
-    final collectionRef = FirebaseFirestore.instance.collection('users');
+    final collectionRef = FirebaseFirestore.instance
+        .collection(Com_string.Firebase_collection_users);
     final querySnapshot =
-        await collectionRef.where('email', isEqualTo: email).get();
+        await collectionRef.where(Com_string.email, isEqualTo: email).get();
 
     if (querySnapshot.docs.isNotEmpty) {
       return querySnapshot.docs.first.id;
@@ -75,9 +77,10 @@ class _TaskPageState extends State<TaskPage> {
     }
   }
 
-  bool isDeveloper() => UserRoleManager().currentRole == 'developer';
+  bool isDeveloper() =>
+      UserRoleManager().currentRole == Com_string.Role_developer;
   bool isAdmin() => UserRoleManager().currentRole == 'admin';
-  bool isManager() => UserRoleManager().currentRole == 'manager';
+  bool isManager() => UserRoleManager().currentRole == Com_string.Role_manager;
 
   void _saveTask() async {
     String? Fcm;
@@ -104,11 +107,11 @@ class _TaskPageState extends State<TaskPage> {
         if (uiddeveloper != null || uidManager != null) {
           if (isManager() || isAdmin()) {
             final snapshot = await FirebaseFirestore.instance
-                .collection('users')
+                .collection(Com_string.Firebase_collection_users)
                 .doc(uiddeveloper)
                 .get();
             if (snapshot.exists) {
-              Fcm = snapshot.get('FCM-token');
+              Fcm = snapshot.get(Com_string.Fcm_Token);
               if (Fcm != null) {
                 NotificationHandler.sendNotification(
                     FCM_token: Fcm.toString(),
@@ -119,11 +122,11 @@ class _TaskPageState extends State<TaskPage> {
             }
           } else if (isDeveloper()) {
             final snapshot = await FirebaseFirestore.instance
-                .collection('users')
+                .collection(Com_string.Firebase_collection_users)
                 .doc(uidManager)
                 .get();
             if (snapshot.exists) {
-              fcmManager = snapshot.get('FCM-token');
+              fcmManager = snapshot.get(Com_string.Fcm_Token);
               if (fcmManager != null) {
                 NotificationHandler.sendNotification(
                     FCM_token: fcmManager.toString(),
@@ -150,11 +153,11 @@ class _TaskPageState extends State<TaskPage> {
         if (uiddeveloper != null || uidManager != null) {
           if (isManager() || isAdmin()) {
             final snapshot = await FirebaseFirestore.instance
-                .collection('users')
+                .collection(Com_string.Firebase_collection_users)
                 .doc(uiddeveloper)
                 .get();
             if (snapshot.exists) {
-              Fcm = snapshot.get('FCM-token');
+              Fcm = snapshot.get(Com_string.Fcm_Token);
               if (Fcm != null) {
                 NotificationHandler.sendNotification(
                     FCM_token: Fcm.toString(),
@@ -165,11 +168,11 @@ class _TaskPageState extends State<TaskPage> {
             }
           } else if (isDeveloper()) {
             final snapshot = await FirebaseFirestore.instance
-                .collection('users')
+                .collection(Com_string.Firebase_collection_users)
                 .doc(uidManager)
                 .get();
             if (snapshot.exists) {
-              fcmManager = snapshot.get('FCM-token');
+              fcmManager = snapshot.get(Com_string.Fcm_Token);
               if (fcmManager != null) {
                 NotificationHandler.sendNotification(
                     FCM_token: fcmManager.toString(),
@@ -319,8 +322,8 @@ class _TaskPageState extends State<TaskPage> {
         const SizedBox(height: 8),
         FutureBuilder<QuerySnapshot>(
           future: FirebaseFirestore.instance
-              .collection('users')
-              .where("role", isEqualTo: "manager")
+              .collection(Com_string.Firebase_collection_users)
+              .where(Com_string.role, isEqualTo: "manager")
               .get(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -334,8 +337,8 @@ class _TaskPageState extends State<TaskPage> {
             }
 
             final managers = snapshot.data!.docs
-                .map((doc) =>
-                    (doc.data() as Map<String, dynamic>)['email'] as String?)
+                .map((doc) => (doc.data()
+                    as Map<String, dynamic>)[Com_string.email] as String?)
                 .toSet()
                 .toList();
 
@@ -378,8 +381,8 @@ class _TaskPageState extends State<TaskPage> {
         const SizedBox(height: 8),
         FutureBuilder<QuerySnapshot>(
           future: FirebaseFirestore.instance
-              .collection('users')
-              .where("role", isEqualTo: "developer")
+              .collection(Com_string.Firebase_collection_users)
+              .where(Com_string.role, isEqualTo: "developer")
               .get(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -393,8 +396,8 @@ class _TaskPageState extends State<TaskPage> {
             }
 
             final developers = snapshot.data!.docs
-                .map((doc) =>
-                    (doc.data() as Map<String, dynamic>)['email'] as String?)
+                .map((doc) => (doc.data()
+                    as Map<String, dynamic>)[Com_string.email] as String?)
                 .toSet()
                 .toList();
 

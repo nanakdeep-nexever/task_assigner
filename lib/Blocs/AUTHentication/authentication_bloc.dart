@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../Screens/Notification_Handle/Notification_Handle.dart';
 import '../../Screens/Views/check_role.dart';
+import '../../generated/Strings_s.dart';
 import 'authentication_event.dart';
 import 'authentication_state.dart';
 
@@ -40,20 +41,20 @@ class AuthenticationBloc
 
       if (_firebaseAuth.currentUser?.uid != null) {
         DocumentSnapshot userDoc = await _firestore
-            .collection('users')
+            .collection(Com_string.Firebase_collection_users)
             .doc(userCredential.user!.uid)
             .get();
 
         if (NotificationHandler.token.toString().isNotEmpty) {
           await _firestore
-              .collection('users')
+              .collection(Com_string.Firebase_collection_users)
               .doc(userCredential.user!.uid)
-              .update({'FCM-token': NotificationHandler.token});
+              .update({Com_string.Fcm_Token: NotificationHandler.token});
         }
 
         if (userDoc.exists) {
-          String? role = userDoc['role'];
-          if (userDoc['status_online'].toString() == 'false') {
+          String? role = userDoc[Com_string.role];
+          if (userDoc[Com_string.Status_online].toString() == 'false') {
             emit(AuthenticationAuthenticated(userId: role));
           } else {
             emit(AuthenticationError(
@@ -63,12 +64,12 @@ class AuthenticationBloc
         //
         else {
           await _firestore
-              .collection('users')
+              .collection(Com_string.Firebase_collection_users)
               .doc(_firebaseAuth.currentUser!.uid)
               .set({
-            'email': _firebaseAuth.currentUser!.email,
-            'role': 'viewer',
-            'status_online': 'false'
+            Com_string.email: _firebaseAuth.currentUser!.email,
+            Com_string.role: Com_string.Role_viewer,
+            Com_string.Status_online: 'false'
           });
           emit(AuthenticationAuthenticated(
               userId: _firebaseAuth.currentUser!.email));
@@ -89,13 +90,17 @@ class AuthenticationBloc
           await _firebaseAuth.createUserWithEmailAndPassword(
               email: event.email, password: event.password);
 
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'email': userCredential.user!.email,
-        'role': 'viewer',
-        'status_online': 'false'
+      await _firestore
+          .collection(Com_string.Firebase_collection_users)
+          .doc(userCredential.user!.uid)
+          .set({
+        Com_string.email: userCredential.user!.email,
+        Com_string.role: Com_string.Role_viewer,
+        Com_string.Status_online: 'false'
       });
 
-      emit(AuthenticationAuthenticated(userId: 'viewer'));
+      emit(AuthenticationAuthenticated(
+          userId: Com_string.Role_viewer.toString()));
     } catch (e) {
       emit(AuthenticationError(message: e.toString()));
     }
@@ -112,10 +117,10 @@ class AuthenticationBloc
     emit(AuthenticationLoading());
     _firebaseAuth.signOut().then((onValue) {
       _firestore
-          .collection('users')
+          .collection(Com_string.Firebase_collection_users)
           .doc(_firebaseAuth.currentUser?.uid)
           .update({
-        'status_online': false,
+        Com_string.Status_online: false,
       });
     });
 
@@ -139,11 +144,14 @@ class AuthenticationBloc
     try {
       final user = _firebaseAuth.currentUser;
       if (user != null) {
-        await _firestore.collection('users').doc(user.uid).delete();
+        await _firestore
+            .collection(Com_string.Firebase_collection_users)
+            .doc(user.uid)
+            .delete();
         await user.delete();
         emit(AuthenticationUnauthenticated());
       } else {
-        emit(AuthenticationError(message: "No user currently authenticated"));
+        emit(AuthenticationError(message: Com_string.UnAuth));
       }
     } catch (e) {
       emit(AuthenticationError(message: e.toString()));

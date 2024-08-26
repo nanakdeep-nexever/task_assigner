@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 class EditUserScreen extends StatefulWidget {
   final String uid;
@@ -84,8 +85,9 @@ class _EditUserScreenState extends State<EditUserScreen> {
           imageUrl = _profileImageUrl;
         }
 
-        final userDoc =
-            FirebaseFirestore.instance.collection('users').doc(widget.uid);
+        final userDoc = FirebaseFirestore.instance
+            .collection(Com_string.Firebase_collection_users)
+            .doc(widget.uid);
         Map<String, dynamic> data = {
           'firstName': _firstNameController.text,
           'lastName': _lastNameController.text,

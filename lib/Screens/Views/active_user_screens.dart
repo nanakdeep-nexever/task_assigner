@@ -5,6 +5,7 @@ import 'package:task_assign_app/Screens/Notification_Handle/Notification_Handle.
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 import 'package:task_assign_app/Screens/Views/create%20_user.dart';
 import 'package:task_assign_app/commons/Common_Functions.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 import 'edit_profile_screen.dart';
 
@@ -64,7 +65,10 @@ class ActiveUsersScreen extends StatelessWidget {
 
   void _deleteUser(BuildContext context, String uid) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+      await FirebaseFirestore.instance
+          .collection(Com_string.Firebase_collection_users)
+          .doc(uid)
+          .delete();
       await FirebaseAuth.instance.currentUser?.delete().then((value) {
         Common_function.snack(context, "User deleted");
       });
@@ -75,13 +79,18 @@ class ActiveUsersScreen extends StatelessWidget {
 
   void _updateUserRole(BuildContext context, String uid, String newRole) async {
     try {
-      await _firestore.collection('users').doc(uid).update({
-        'role': newRole,
+      await _firestore
+          .collection(Com_string.Firebase_collection_users)
+          .doc(uid)
+          .update({
+        Com_string.role: newRole,
       });
-      final snapshot =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      final snapshot = await FirebaseFirestore.instance
+          .collection(Com_string.Firebase_collection_users)
+          .doc(uid)
+          .get();
       if (snapshot.exists) {
-        String fcmManager = snapshot.get('FCM-token');
+        String fcmManager = snapshot.get(Com_string.Fcm_Token);
         if (fcmManager.isNotEmpty) {
           NotificationHandler.sendNotification(
               FCM_token: fcmManager.toString(),
@@ -99,7 +108,7 @@ class ActiveUsersScreen extends StatelessWidget {
   void _showCreateUserDialog(BuildContext context) {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
-    String selectedRole = 'viewer';
+    String selectedRole = Com_string.Role_viewer;
 
     showDialog(
       context: context,
@@ -128,7 +137,11 @@ class ActiveUsersScreen extends StatelessWidget {
               DropdownButtonFormField<String>(
                 value: selectedRole,
                 decoration: const InputDecoration(labelText: 'Role'),
-                items: ['manager', 'developer', 'viewer']
+                items: [
+                  Com_string.Role_manager,
+                  Com_string.Role_developer,
+                  Com_string.Role_viewer
+                ]
                     .map((role) => DropdownMenuItem<String>(
                           value: role,
                           child: Text(role),
@@ -166,12 +179,12 @@ class ActiveUsersScreen extends StatelessWidget {
                             email: email, password: password);
 
                     await FirebaseFirestore.instance
-                        .collection('users')
+                        .collection(Com_string.Firebase_collection_users)
                         .doc(userCredential.user?.uid)
                         .set({
-                      'email': email,
-                      'role': selectedRole,
-                      'status_online': 'false'
+                      Com_string.email: email,
+                      Com_string.role: selectedRole,
+                      Com_string.Status_online: 'false'
                     });
 
                     Navigator.of(context).pop();
@@ -180,7 +193,8 @@ class ActiveUsersScreen extends StatelessWidget {
                     Common_function.snack(context, 'Error creating user: $e');
                   }
                 } else {
-                  Common_function.snack(context, 'Please fill all fields');
+                  Common_function.snack(
+                      context, Com_string.Please_fill_all_field);
                 }
               },
               child: const Text(
@@ -253,7 +267,11 @@ class ActiveUsersScreen extends StatelessWidget {
 
   void _showRoleChangeDialog(
       BuildContext context, String uid, String currentRole) {
-    final List<String> roles = ['manager', 'developer', 'viewer'];
+    final List<String> roles = [
+      Com_string.Role_manager,
+      Com_string.Role_developer,
+      Com_string.Role_viewer
+    ];
 
     String selectedRole =
         roles.contains(currentRole) ? currentRole : roles.first;
@@ -322,7 +340,9 @@ class ActiveUsersScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection(Com_string.Firebase_collection_users)
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -343,8 +363,8 @@ class ActiveUsersScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final user = users[index];
               final uid = user.id;
-              final email = user['email'] ?? 'No Email';
-              final role = user["role"];
+              final email = user[Com_string.email] ?? 'No Email';
+              final role = user[Com_string.role];
               final img = user["profileImageUrl"] ?? "";
               final name = user["firstName"] ?? "Unknown";
               final lastName = user["lastName"] ?? "Unknown";
@@ -407,7 +427,7 @@ class ActiveUsersScreen extends StatelessWidget {
                                             )));
                               } else if (value == 'delete') {
                                 _confirmDeleteUser(context, uid);
-                              } else if (value == 'role') {
+                              } else if (value == Com_string.role) {
                                 _showRoleChangeConfirmationDialog(
                                     context, uid, role);
                               }
@@ -418,7 +438,7 @@ class ActiveUsersScreen extends StatelessWidget {
                                 child: Text('Edit'),
                               ),
                               const PopupMenuItem<String>(
-                                value: 'role',
+                                value: Com_string.role,
                                 child: Text('Edit role'),
                               ),
                               const PopupMenuItem<String>(

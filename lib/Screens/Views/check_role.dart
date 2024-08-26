@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../../generated/Strings_s.dart';
+
 class UserRoleManager {
   static final UserRoleManager _instance = UserRoleManager._internal();
 
@@ -28,9 +30,13 @@ class UserRoleManager {
     String? uid = _firebaseAuth.currentUser?.uid;
 
     if (uid != null) {
-      _firestore.collection('users').doc(uid).snapshots().listen((snapshot) {
+      _firestore
+          .collection(Com_string.Firebase_collection_users)
+          .doc(uid)
+          .snapshots()
+          .listen((snapshot) {
         if (snapshot.exists) {
-          _currentRole = snapshot.data()?['role'] as String?;
+          _currentRole = snapshot.data()?[Com_string.role] as String?;
           _roleController.add(_currentRole);
         } else {
           _currentRole = null;
@@ -42,17 +48,17 @@ class UserRoleManager {
 
   bool isViewer() {
     String role = currentRole.toString();
-    return role == 'viewer';
+    return role == Com_string.Role_viewer;
   }
 
   bool isDeveloper() {
     String role = currentRole.toString();
-    return role == 'developer';
+    return role == Com_string.Role_developer;
   }
 
   bool isManager() {
     String role = currentRole.toString();
-    return role == 'manager';
+    return role == Com_string.Role_manager;
   }
 
   bool isAdmin() {

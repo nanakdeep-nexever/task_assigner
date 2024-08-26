@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:task_assign_app/commons/Common_Functions.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 import '../Blocs/AUTHentication/authentication_bloc.dart';
 import '../Blocs/AUTHentication/authentication_event.dart';
@@ -34,9 +35,9 @@ class _LoginPageState extends State<LoginPage> {
             _emailController.clear();
             _passwordController.clear();
             _firestore
-                .collection('users')
+                .collection(Com_string.Firebase_collection_users)
                 .doc(_firebaseAuth.currentUser?.uid.toString())
-                .update({'status_online': 'true'});
+                .update({Com_string.Status_online: 'true'});
 
             print("Login SuccessFully");
             Navigator.pushNamed(context, "/dashboard");
@@ -84,10 +85,10 @@ class _LoginPageState extends State<LoginPage> {
                           keyboardType: TextInputType.emailAddress,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
+                              return Com_string.Enter_Your_Email;
                             } else if (!RegExp(r'\S+@\S+\.\S+')
                                 .hasMatch(value)) {
-                              return 'Please enter a valid email address';
+                              return Com_string.Enter_valid_Email;
                             }
                             return null;
                           },
@@ -123,9 +124,9 @@ class _LoginPageState extends State<LoginPage> {
                           obscureText: !isPasswordVisible,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                              return Com_string.Enter_your_password;
                             } else if (value.length < 6) {
-                              return 'Password must be at least 6 characters long';
+                              return Com_string.Enter_valid_password;
                             }
                             return null;
                           },
@@ -137,7 +138,7 @@ class _LoginPageState extends State<LoginPage> {
                             text: TextSpan(
                               children: [
                                 TextSpan(
-                                  text: 'Forgot Password?',
+                                  text: Com_string.Forgot_password,
                                   style: const TextStyle(
                                     color: Colors.red,
                                     fontSize: 16.0,
@@ -181,7 +182,7 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             child: state is AuthenticationLoading
                                 ? const CircularProgressIndicator()
-                                : const Text('Login'),
+                                : const Text(Com_string.Login),
                           ),
                         ),
                         const SizedBox(height: 16.0),
@@ -189,12 +190,12 @@ class _LoginPageState extends State<LoginPage> {
                           text: TextSpan(
                             children: [
                               const TextSpan(
-                                text: 'Don\'t have an account? ',
+                                text: Com_string.You_have_not_account,
                                 style: TextStyle(
                                     color: Colors.black, fontSize: 16.0),
                               ),
                               TextSpan(
-                                text: 'Register here',
+                                text: Com_string.Register_here,
                                 style: const TextStyle(
                                   color: Colors.blue,
                                   fontSize: 16.0,

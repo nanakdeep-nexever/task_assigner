@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 class CreateUserPage extends StatefulWidget {
   const CreateUserPage({super.key});
@@ -20,7 +21,7 @@ class _CreateUserPageState extends State<CreateUserPage> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
-  String _selectedRole = 'viewer';
+  String _selectedRole = Com_string.Role_viewer;
   XFile? _imageFile;
   final _picker = ImagePicker();
   bool _isLoading = false;
@@ -70,15 +71,15 @@ class _CreateUserPageState extends State<CreateUserPage> {
         }
 
         await FirebaseFirestore.instance
-            .collection('users')
+            .collection(Com_string.Firebase_collection_users)
             .doc(userCredential.user?.uid)
             .set({
-          'email': email,
+          Com_string.email: email,
           'firstName': _firstNameController.text,
           'lastName': _lastNameController.text,
           'phoneNumber': _phoneNumberController.text,
-          'role': _selectedRole,
-          'status_online': 'false',
+          Com_string.role: _selectedRole,
+          Com_string.Status_online: 'false',
           'profileImageUrl': imageUrl,
         });
 
@@ -98,7 +99,7 @@ class _CreateUserPageState extends State<CreateUserPage> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        const SnackBar(content: Text(Com_string.Please_fill_all_field)),
       );
     }
   }
@@ -178,7 +179,12 @@ class _CreateUserPageState extends State<CreateUserPage> {
                     borderSide: BorderSide.none,
                   ),
                 ),
-                items: ['admin', 'manager', 'developer', 'viewer']
+                items: [
+                  'admin',
+                  Com_string.Role_manager,
+                  Com_string.Role_developer,
+                  Com_string.Role_viewer
+                ]
                     .map((role) => DropdownMenuItem<String>(
                           value: role,
                           child: Text(role),

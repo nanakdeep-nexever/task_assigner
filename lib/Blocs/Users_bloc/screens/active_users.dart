@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../generated/Strings_s.dart';
 import '../active_users_bloc.dart';
 import '../active_users_event.dart';
 import '../active_users_state.dart';
@@ -11,7 +12,7 @@ class ActiveUserPage extends StatelessWidget {
   void _showCreateUserDialog(BuildContext context) {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
-    String selectedRole = 'viewer';
+    String selectedRole = Com_string.Role_viewer.toString();
 
     showDialog(
       context: context,
@@ -40,7 +41,12 @@ class ActiveUserPage extends StatelessWidget {
               DropdownButtonFormField<String>(
                 value: selectedRole,
                 decoration: const InputDecoration(labelText: 'Role'),
-                items: ['admin', 'manager', 'developer', 'viewer']
+                items: [
+                  'admin',
+                  'manager',
+                  Com_string.Role_developer,
+                  Com_string.Role_viewer
+                ]
                     .map((role) => DropdownMenuItem<String>(
                           value: role,
                           child: Text(role),
@@ -58,7 +64,7 @@ class ActiveUserPage extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               child: const Text(
-                'Cancel',
+                Com_string.Cancel,
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
@@ -78,7 +84,8 @@ class ActiveUserPage extends StatelessWidget {
                   Navigator.of(context).pop();
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
+                    const SnackBar(
+                        content: Text(Com_string.Please_fill_all_field)),
                   );
                 }
               },
@@ -126,8 +133,8 @@ class ActiveUserPage extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final user = users[index];
                   final uid = user.id;
-                  final email = user['email'] ?? 'No Email';
-                  final role = user["role"];
+                  final email = user[Com_string.email] ?? 'No Email';
+                  final role = user[Com_string.role];
 
                   return Card(
                     margin:

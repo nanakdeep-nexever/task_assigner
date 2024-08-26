@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:task_assign_app/Blocs/Profile_bloc/profile_event.dart';
 import 'package:task_assign_app/Blocs/Profile_bloc/profile_state.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc() : super(ProfileInitial()) {
@@ -29,7 +30,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       }
 
       await FirebaseFirestore.instance
-          .collection('users')
+          .collection(Com_string.Firebase_collection_users)
           .doc(FirebaseAuth.instance.currentUser?.uid)
           .update({
         'firstName': event.firstName,
@@ -59,7 +60,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       FetchUserProfile event, Emitter<ProfileState> emit) async {
     try {
       final userDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(Com_string.Firebase_collection_users)
           .doc(FirebaseAuth.instance.currentUser?.uid)
           .get();
 

@@ -200,14 +200,14 @@
 //   Future<List<String>> _fetchDeveloperDropdownItems() async {
 //     try {
 //       final snapshot = await FirebaseFirestore.instance
-//           .collection('users')
-//           .where('role', isEqualTo: 'developer')
+//           .collection(Com_string.Firebase_collection_users)
+//           .where(Com_string.role, isEqualTo: Com_string.Role_developer)
 //           .get();
 //
 //       final developers = snapshot.docs.map((doc) {
 //         final data = doc.data() as Map<String, dynamic>;
 //         final name =
-//             data['email'] as String? ?? 'Unknown'; // Ensure name is a String
+//             data[Com_string.email] as String? ?? 'Unknown'; // Ensure name is a String
 //         final id = doc.id;
 //         developerMap[id] = id; // Store ID and name in the map
 //         return name; // Return the name for the dropdown
@@ -298,7 +298,7 @@
 //       await FirebaseFirestore.instance.collection('tasks').add(newTask);
 //
 //       if (uidDeveloper != null) {
-//         await _sendNotification(uidDeveloper, 'developer');
+//         await _sendNotification(uidDeveloper, Com_string.Role_developer);
 //       }
 //
 //       Navigator.of(context).pop();
@@ -310,12 +310,12 @@
 //
 //   Future<void> _sendNotification(String userId, String role) async {
 //     final snapshot =
-//         await FirebaseFirestore.instance.collection('users').doc(userId).get();
-//     final fcmToken = snapshot.get('FCM-token') as String?;
+//         await FirebaseFirestore.instance.collection(Com_string.Firebase_collection_users).doc(userId).get();
+//     final fcmToken = snapshot.get(Com_string.Fcm_Token) as String?;
 //     if (fcmToken != null) {
 //       final title = "Task Updated: ${nameController.text}";
-//       final body = role == 'manager'
-//           ? "Deadline: ${selectedDeadline.toString()}, Assigned By: ${snapshot.get('email')}"
+//       final body = role == Com_string.Role_manager
+//           ? "Deadline: ${selectedDeadline.toString()}, Assigned By: ${snapshot.get(Com_string.email)}"
 //           : role == 'admin'
 //               ? "Deadline: ${selectedDeadline.toString()}, Assigned By: Admin"
 //               : "Deadline: ${selectedDeadline.toString()}";
@@ -325,9 +325,9 @@
 //   }
 //
 //   Future<String?> getDocumentIdByEmail(String email) async {
-//     final collectionRef = FirebaseFirestore.instance.collection('users');
+//     final collectionRef = FirebaseFirestore.instance.collection(Com_string.Firebase_collection_users);
 //     final querySnapshot =
-//         await collectionRef.where('email', isEqualTo: email).get();
+//         await collectionRef.where(Com_string.email, isEqualTo: email).get();
 //     if (querySnapshot.docs.isNotEmpty) {
 //       return querySnapshot.docs.first.id;
 //     } else {

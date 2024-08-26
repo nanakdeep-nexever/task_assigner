@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../../generated/Strings_s.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -15,13 +17,13 @@ class _SplashScreenState extends State<SplashScreen> {
   String? role;
   void _fetchrole() async {
     DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('users')
+        .collection(Com_string.Firebase_collection_users)
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .get();
 
     if (doc.exists) {
       setState(() {
-        role = doc.get('role') ?? '';
+        role = doc.get(Com_string.role) ?? '';
       });
     }
   }

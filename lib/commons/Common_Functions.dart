@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import '../generated/Strings_s.dart';
+
 class Common_function {
   Common_function._();
 
@@ -20,12 +22,12 @@ class Common_function {
   static Future<String?> getManagerEmail(String managerId) async {
     try {
       DocumentSnapshot managerDoc = await FirebaseFirestore.instance
-          .collection('users')
+          .collection(Com_string.Firebase_collection_users)
           .doc(managerId)
           .get();
 
       if (managerDoc.exists) {
-        return managerDoc.get('email') as String?;
+        return managerDoc.get(Com_string.email) as String?;
       } else {
         return 'No email found'; // Or handle as needed
       }

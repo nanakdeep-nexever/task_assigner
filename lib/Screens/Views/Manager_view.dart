@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:task_assign_app/commons/Common_Functions.dart';
+import 'package:task_assign_app/generated/Strings_s.dart';
 
 import '../../Blocs/AUTHentication/authentication_bloc.dart';
 import '../../Blocs/AUTHentication/authentication_event.dart';
@@ -66,7 +67,7 @@ class ManagerPageState extends State<ManagerPage> {
                     'heading': "Manager Profile",
                     "uName": FirebaseAuth.instance.currentUser?.displayName ??
                         "User",
-                    "email": FirebaseAuth.instance.currentUser?.email
+                    Com_string.email: FirebaseAuth.instance.currentUser?.email
                   },
                 );
               },
@@ -149,7 +150,7 @@ class ManagerPageState extends State<ManagerPage> {
                         ),
                         const SizedBox(height: 6),
                         SectionHeader(
-                          title: "Active Tasks",
+                          title: Com_string.Active_Tasks,
                           onTap: () {
                             Navigator.push(
                               context,
@@ -163,7 +164,7 @@ class ManagerPageState extends State<ManagerPage> {
                         TaskList(tasks: state.userTasks),
                         const SizedBox(height: 10),
                         SectionHeader(
-                          title: "Active Projects",
+                          title: Com_string.Active_Projects,
                           onTap: () {
                             Navigator.push(
                               context,

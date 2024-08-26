@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../Blocs/AUTHentication/authentication_bloc.dart';
 import '../Blocs/AUTHentication/authentication_event.dart';
 import '../Screens/Views/check_role.dart';
+import '../generated/Strings_s.dart';
 
 class ProfileSection extends StatelessWidget {
   final String heading;
@@ -32,8 +33,10 @@ class ProfileSection extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: FutureBuilder<DocumentSnapshot>(
-          future:
-              FirebaseFirestore.instance.collection('users').doc(userId).get(),
+          future: FirebaseFirestore.instance
+              .collection(Com_string.Firebase_collection_users)
+              .doc(userId)
+              .get(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -49,7 +52,8 @@ class ProfileSection extends StatelessWidget {
 
             final userData = snapshot.data!.data() as Map<String, dynamic>;
             final String uName = userData['firstName'] ?? 'Guest';
-            final String email = userData['email'] ?? 'guest@example.com';
+            final String email =
+                userData[Com_string.email] ?? 'guest@example.com';
             final String img = userData['profileImageUrl'] ?? '';
 
             return Column(

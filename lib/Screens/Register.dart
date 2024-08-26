@@ -32,13 +32,13 @@ class _RegisterPageState extends State<RegisterPage> {
                 '/admin',
                 arguments: state.userId.toString(),
               );
-            } else if (state.userId == 'manager') {
+            } else if (state.userId == Com_string.Role_manager) {
               Navigator.pushReplacementNamed(
                 context,
                 '/manager',
                 arguments: state.userId.toString(),
               );
-            } else if (state.userId == 'developer') {
+            } else if (state.userId == Com_string.Role_developer) {
               Navigator.pushReplacementNamed(
                 context,
                 '/developer',

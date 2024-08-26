@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 
+import '../generated/Strings_s.dart';
 import 'Notification_Handle/Notification_Handle.dart';
 
 class ProjectFormPage extends StatefulWidget {
@@ -52,8 +53,8 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   Future<void> _fetchManagers() async {
     try {
       final snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .where('role', isEqualTo: 'manager')
+          .collection(Com_string.Firebase_collection_users)
+          .where(Com_string.role, isEqualTo: Com_string.Role_manager)
           .get();
 
       setState(() {
@@ -61,7 +62,7 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
           final data = doc.data() as Map<String, dynamic>;
           return {
             'id': doc.id,
-            'email': data['email'] as String? ?? '',
+            Com_string.email: data[Com_string.email] as String? ?? '',
           };
         }).toList();
 
@@ -147,11 +148,11 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   //             selectedManagerId.toString().isNotEmpty) {
   //           if (UserRoleManager().isManager()) {
   //             final snapshot = await FirebaseFirestore.instance
-  //                 .collection('users')
+  //                 .collection(Com_string.Firebase_collection_users)
   //                 .doc(selectedManagerId)
   //                 .get();
   //             if (snapshot.exists) {
-  //               String Fcm = snapshot.get('FCM-token');
+  //               String Fcm = snapshot.get(Com_string.Fcm_Token);
   //               if (Fcm != null) {
   //                 NotificationHandler.sendNotification(
   //                     FCM_token: Fcm.toString(),
@@ -161,11 +162,11 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   //             }
   //           } else if (UserRoleManager().isAdmin()) {
   //             final snapshot = await FirebaseFirestore.instance
-  //                 .collection('users')
+  //                 .collection(Com_string.Firebase_collection_users)
   //                 .doc(selectedManagerId)
   //                 .get();
   //             if (snapshot.exists) {
-  //               String Fcm = snapshot.get('FCM-token');
+  //               String Fcm = snapshot.get(Com_string.Fcm_Token);
   //               if (Fcm != null) {
   //                 NotificationHandler.sendNotification(
   //                     FCM_token: Fcm.toString(),
@@ -282,12 +283,12 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
 
   Future<void> _sendNotificationToAllAdmins(String sn) async {
     final adminSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('role', isEqualTo: 'admin')
+        .collection(Com_string.Firebase_collection_users)
+        .where(Com_string.role, isEqualTo: 'admin')
         .get();
 
     for (var doc in adminSnapshot.docs) {
-      final String? fcmToken = doc.get('FCM-token');
+      final String? fcmToken = doc.get(Com_string.Fcm_Token);
       if (fcmToken != null) {
         final title = "Project: ${nameController.text}";
         final body =
@@ -305,12 +306,12 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
   Future<void> _sendNotificationIfNeeded(
       String managerId, bool isManager, bool isAdmin, String sn) async {
     final snapshot = await FirebaseFirestore.instance
-        .collection('users')
+        .collection(Com_string.Firebase_collection_users)
         .doc(managerId)
         .get();
 
     if (snapshot.exists) {
-      final String? fcmToken = snapshot.get('FCM-token');
+      final String? fcmToken = snapshot.get(Com_string.Fcm_Token);
       if (fcmToken != null) {
         final title = "Project: ${nameController.text}";
         final body = isManager
@@ -391,12 +392,12 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                         ...managers,
                         {
                           'id': '',
-                          'email': 'Unassigned',
+                          Com_string.email: 'Unassigned',
                         }
                       ]
                           .map((manager) => DropdownMenuItem<String>(
                                 value: manager['id'],
-                                child: Text(manager['email'] ?? ''),
+                                child: Text(manager[Com_string.email] ?? ''),
                               ))
                           .toList(),
                       onChanged: (value) {
@@ -413,8 +414,9 @@ class _ProjectFormPageState extends State<ProjectFormPage> {
                             ? managers.firstWhere(
                                     (manager) =>
                                         manager['id'] == selectedManagerId,
-                                    orElse: () =>
-                                        {'email': 'Unassigned'})['email'] ??
+                                    orElse: () => {
+                                          Com_string.email: 'Unassigned'
+                                        })[Com_string.email] ??
                                 'Unassigned'
                             : 'Unassigned',
                         border: OutlineInputBorder(),
