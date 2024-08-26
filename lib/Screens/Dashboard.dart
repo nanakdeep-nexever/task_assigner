@@ -4,7 +4,6 @@ import 'package:task_assign_app/Blocs/Rolecube.dart';
 import 'package:task_assign_app/Screens/Views/Admin.dart';
 import 'package:task_assign_app/Screens/Views/Devloper_view.dart';
 import 'package:task_assign_app/Screens/Views/Manager_view.dart';
-import 'package:task_assign_app/Screens/Views/check_role.dart';
 import 'package:task_assign_app/Screens/Views/viewer_view.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -19,12 +18,10 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocConsumer<RoleCubit, RoleState>(
-        listener: (context, state) {
-          UserRoleManager().init();
-        },
+        listener: (context, state) {},
         builder: (context, state) {
           if (state.role == 'admin') {
-            return const AdminPage();
+            return AdminPage();
           } else if (state.role == 'manager') {
             return const ManagerPage();
           } else if (state.role == 'developer') {

@@ -1,16 +1,39 @@
-part of 'admin_bloc.dart';
+// lib/Blocs/AdminBloc/admin_event.dart
 
-abstract class AdminEvent extends Equatable {
-  const AdminEvent();
+import 'package:equatable/equatable.dart';
+
+abstract class AdminPageEvent extends Equatable {
+  const AdminPageEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-class FetchUserData extends AdminEvent {}
+class LoadDataEvent extends AdminPageEvent {}
 
-class FetchActiveUsers extends AdminEvent {}
+class UpdateUsersEvent extends AdminPageEvent {
+  final List<Map<String, dynamic>> users;
 
-class FetchActiveTasks extends AdminEvent {}
+  const UpdateUsersEvent(this.users);
 
-class FetchActiveProjects extends AdminEvent {}
+  @override
+  List<Object?> get props => [users];
+}
+
+class UpdateTasksEvent extends AdminPageEvent {
+  final List<Map<String, dynamic>> tasks;
+
+  const UpdateTasksEvent(this.tasks);
+
+  @override
+  List<Object?> get props => [tasks];
+}
+
+class UpdateProjectsEvent extends AdminPageEvent {
+  final List<Map<String, dynamic>> projects;
+
+  const UpdateProjectsEvent(this.projects);
+
+  @override
+  List<Object?> get props => [projects];
+}

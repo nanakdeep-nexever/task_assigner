@@ -8,6 +8,7 @@ import 'package:task_assign_app/Screens/Views/edit_profile_screen.dart';
 import 'package:task_assign_app/Screens/Views/splash_screen.dart';
 
 import 'Blocs/AUTHentication/authentication_bloc.dart';
+import 'Blocs/AdminBloc/admin_bloc.dart';
 import 'Blocs/Management_bloc/management_bloc.dart';
 import 'Blocs/Messaging.dart';
 import 'Blocs/Notification_bloc/notification_bloc.dart';
@@ -73,7 +74,7 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (context) => AuthenticationBloc()),
         BlocProvider(create: (context) => ManagerPageBloc(_firestore)),
-        // BlocProvider(create: (context) => AdminPageBloc(_firestore)),
+        BlocProvider(create: (context) => AdminPageBloc()),
         BlocProvider(create: (context) => NotificationBloc()),
         BlocProvider(create: (context) => ProjectBloc()),
         BlocProvider(create: (context) => TaskBloc()),
@@ -94,7 +95,7 @@ class MyApp extends StatelessWidget {
       '/': (context) => const LoginPage(),
       '/splash': (context) => const SplashScreen(),
       '/register': (context) => const RegisterPage(),
-      '/admin': (context) => const AdminPage(),
+      '/admin': (context) => AdminPage(),
       '/manager': (context) => const ManagerPage(),
       '/developer': (context) => const DeveloperPage(),
       '/viewer': (context) => const ViewerPage(),

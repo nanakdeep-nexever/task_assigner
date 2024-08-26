@@ -1,57 +1,45 @@
-part of 'admin_bloc.dart';
+// lib/Blocs/AdminBloc/admin_state.dart
 
-abstract class AdminState extends Equatable {
-  const AdminState();
+import 'package:equatable/equatable.dart';
+
+abstract class Admin_Page_State extends Equatable {
+  const Admin_Page_State();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-class AdminInitial extends AdminState {}
+class AdminPageInitial extends Admin_Page_State {}
 
-class AdminLoading extends AdminState {}
+class AdminPageLoading extends Admin_Page_State {}
 
-class AdminError extends AdminState {
+class AdminPageLoaded extends Admin_Page_State {
+  final int activeUsers;
+  final int activeTasks;
+  final int activeProjects;
+  final List<Map<String, dynamic>> users;
+  final List<Map<String, dynamic>> tasks;
+  final List<Map<String, dynamic>> projects;
+
+  const AdminPageLoaded({
+    required this.activeUsers,
+    required this.activeTasks,
+    required this.activeProjects,
+    required this.users,
+    required this.tasks,
+    required this.projects,
+  });
+
+  @override
+  List<Object?> get props =>
+      [activeUsers, activeTasks, activeProjects, users, tasks, projects];
+}
+
+class AdminPageError extends Admin_Page_State {
   final String message;
 
-  const AdminError(this.message);
+  const AdminPageError(this.message);
 
   @override
-  List<Object> get props => [message];
-}
-
-class AdminUserDataLoaded extends AdminState {
-  final Stream<QuerySnapshot> userStream;
-
-  const AdminUserDataLoaded(this.userStream);
-
-  @override
-  List<Object> get props => [userStream];
-}
-
-class AdminActiveUsersLoaded extends AdminState {
-  final Stream<int> activeUsersStream;
-
-  const AdminActiveUsersLoaded(this.activeUsersStream);
-
-  @override
-  List<Object> get props => [activeUsersStream];
-}
-
-class AdminActiveTasksLoaded extends AdminState {
-  final Stream<int> activeTasksStream;
-
-  const AdminActiveTasksLoaded(this.activeTasksStream);
-
-  @override
-  List<Object> get props => [activeTasksStream];
-}
-
-class AdminActiveProjectsLoaded extends AdminState {
-  final Stream<int> activeProjectsStream;
-
-  const AdminActiveProjectsLoaded(this.activeProjectsStream);
-
-  @override
-  List<Object> get props => [activeProjectsStream];
+  List<Object?> get props => [message];
 }

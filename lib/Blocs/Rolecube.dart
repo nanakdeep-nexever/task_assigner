@@ -12,11 +12,11 @@ class RoleCubit extends Cubit<RoleState> {
     });
   }
 
-  @override
-  Future<void> close() {
-    _userRoleManager.dispose();
-    return super.close();
-  }
+  // @override
+  // Future<void> close() {
+  //   _userRoleManager.dispose();
+  //   return super.close();
+  // }
 }
 
 class RoleState extends Equatable {
