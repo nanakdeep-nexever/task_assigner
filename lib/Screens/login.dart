@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:task_assign_app/commons/Common_Functions.dart';
 
 import '../Blocs/AUTHentication/authentication_bloc.dart';
 import '../Blocs/AUTHentication/authentication_event.dart';
@@ -19,10 +20,6 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  void snack(BuildContext context, String msg) async {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +29,7 @@ class _LoginPageState extends State<LoginPage> {
       body: BlocConsumer<AuthenticationBloc, AuthenticationState>(
         listener: (context, state) {
           if (state is AuthenticationAuthenticated) {
-            snack(context, "Login Successful");
+            Common_function.snack(context, "Login Successful");
 
             _emailController.clear();
             _passwordController.clear();
@@ -45,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
             Navigator.pushNamed(context, "/dashboard");
           } else if (state is AuthenticationError) {
             print("Invalid Error");
-            snack(context, "Invalid credential");
+            Common_function.snack(context, "Invalid credential");
           }
         },
         builder: (context, state) {

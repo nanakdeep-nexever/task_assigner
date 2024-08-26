@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class Common_function {
   Common_function._();
@@ -31,5 +32,10 @@ class Common_function {
     } catch (e) {
       return 'Unassigned Manager'; // Or handle as needed
     }
+  }
+
+  static snack(BuildContext context, String msg) async {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 }

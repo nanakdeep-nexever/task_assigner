@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:task_assign_app/Screens/Notification_Handle/Notification_Handle.dart';
 import 'package:task_assign_app/Screens/Views/check_role.dart';
 import 'package:task_assign_app/Screens/Views/create%20_user.dart';
+import 'package:task_assign_app/commons/Common_Functions.dart';
 
 import 'edit_profile_screen.dart';
 
@@ -64,13 +65,11 @@ class ActiveUsersScreen extends StatelessWidget {
   void _deleteUser(BuildContext context, String uid) async {
     try {
       await FirebaseFirestore.instance.collection('users').doc(uid).delete();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User deleted')),
-      );
+      await FirebaseAuth.instance.currentUser?.delete().then((value) {
+        Common_function.snack(context, "User deleted");
+      });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting user: $e')),
-      );
+      Common_function.snack(context, 'Error deleting user: $e');
     }
   }
 
@@ -91,11 +90,9 @@ class ActiveUsersScreen extends StatelessWidget {
                   "New Role $newRole Updated By ${FirebaseAuth.instance.currentUser?.email}");
         }
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Role updated successfully')));
+      Common_function.snack(context, "Role updated successfully");
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error updating role: $e')));
+      Common_function.snack(context, 'Error updating role: $e');
     }
   }
 
@@ -131,7 +128,7 @@ class ActiveUsersScreen extends StatelessWidget {
               DropdownButtonFormField<String>(
                 value: selectedRole,
                 decoration: const InputDecoration(labelText: 'Role'),
-                items: ['admin', 'manager', 'developer', 'viewer']
+                items: ['manager', 'developer', 'viewer']
                     .map((role) => DropdownMenuItem<String>(
                           value: role,
                           child: Text(role),
@@ -178,20 +175,12 @@ class ActiveUsersScreen extends StatelessWidget {
                     });
 
                     Navigator.of(context).pop();
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('User created successfully')),
-                    );
+                    Common_function.snack(context, 'User created successfully');
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error creating user: $e')),
-                    );
+                    Common_function.snack(context, 'Error creating user: $e');
                   }
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please fill all fields')),
-                  );
+                  Common_function.snack(context, 'Please fill all fields');
                 }
               },
               child: const Text(
