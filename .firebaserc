@@ -1,0 +1,10 @@
+{
+  "projects": {
+    "default": "project-tracker-nk"
+  },
+  "dataconnectEmulatorConfig": {
+    "postgres": {
+      "localConnectionString": "postgresql://localhost:5432?sslmode=disable"
+    }
+  }
+}

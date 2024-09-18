@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -64,8 +65,8 @@ class ProfileSection extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CircleAvatar(
-                        backgroundImage:
-                            img.isNotEmpty ? NetworkImage(img) : null,
+                        // backgroundImage:
+                        //     img.isNotEmpty ? NetworkImage(img) : null,
                         radius: 50,
                         child: img.isEmpty
                             ? const Icon(
@@ -73,7 +74,7 @@ class ProfileSection extends StatelessWidget {
                                 size: 50,
                                 color: Colors.grey,
                               )
-                            : null,
+                            : CachedNetworkImage(imageUrl: img),
                       ),
                       const SizedBox(
                         height: 10,

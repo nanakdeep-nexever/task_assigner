@@ -23,9 +23,9 @@ class _DashboardPageState extends State<DashboardPage> {
         builder: (context, state) {
           if (state.role == 'admin') {
             return AdminPage();
-          } else if (state.role == Roles.manager.toString()) {
+          } else if (state.role == Com_string.Role_manager) {
             return const ManagerPage();
-          } else if (state.role == Roles.developer.toString()) {
+          } else if (state.role == Com_string.Role_developer) {
             return const DeveloperPage();
           } else {
             return const ViewerPage();

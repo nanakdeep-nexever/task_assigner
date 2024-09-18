@@ -1,5 +1,5 @@
 name: task_assign_app
-description: "Application to Assign Projects And Tasks For Employee"
+description: "Ao Assign Projects And Tasks For Employee"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -49,6 +49,7 @@ dependencies:
   firebase_storage: ^12.1.3
   image_picker: ^1.1.2
   get_it: ^7.7.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

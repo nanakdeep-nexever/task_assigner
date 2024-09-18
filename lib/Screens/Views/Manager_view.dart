@@ -240,14 +240,15 @@ class ManagerPageState extends State<ManagerPage> {
     required List<Widget> screens,
   }) {
     final colors = [Colors.green, Colors.orange];
+    bool isbigscreen = MediaQuery.of(context).size.width >= 800;
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.15,
+      height: isbigscreen ?MediaQuery.of(context).size.height * 0.3 :MediaQuery.of(context).size.height * 0.15,
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 1.5,
+          childAspectRatio: isbigscreen ? 3.7 : 1.7,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
         ),

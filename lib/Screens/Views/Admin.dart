@@ -119,6 +119,7 @@ class AdminPageState extends State<AdminPage> {
   }
 
   Widget _buildUnknownStateScreen() {
+
     return Scaffold(
       body: Center(child: Text('Unknown state')),
     );
@@ -133,6 +134,7 @@ class AdminPageState extends State<AdminPage> {
   }
 
   Widget _buildGridSection(AdminPageLoaded adminState) {
+    bool isbigscreen = MediaQuery.of(context).size.width >= 750;
     final titles = [
       Com_string.Active_Users,
       Com_string.Active_Tasks,
@@ -151,12 +153,12 @@ class AdminPageState extends State<AdminPage> {
     ];
 
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.3,
+      height:isbigscreen ? MediaQuery.of(context).size.height * 0.42 : MediaQuery.of(context).size.height * 0.33,
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 1.5,
+        gridDelegate:  SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: isbigscreen? 3 : 2 ,
+          childAspectRatio: isbigscreen ? 1.7 : 1.5,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
         ),
@@ -187,7 +189,7 @@ class AdminPageState extends State<AdminPage> {
         elevation: 4,
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(14.0),
+            padding: const EdgeInsets.all(13.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
